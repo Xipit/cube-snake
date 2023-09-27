@@ -27,12 +27,12 @@ public class Dimension3D
 /// </summary>
 public class Dimension2D
 {
-    public int X { get; }
-    public int Y { get; }
+    public int A { get; }
+    public int B { get; }
     
-    public Dimension2D(int x, int y)
+    public Dimension2D(int a, int b)
     {
-        this.X = x;
-        this.Y = y;
+        this.A = a;
+        this.B = b;
     }
 }

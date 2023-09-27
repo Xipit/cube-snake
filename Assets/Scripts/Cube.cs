@@ -23,10 +23,13 @@ public class Cube
     public CubeSide prototypeSide;
 
     public Vector3 position;
-    public Vector3 rotation; // probably needs to be a quaternion
+    public Quaternion rotation; // probably needs to be a quaternion
 
-    public Cube()
+    public Cube(Vector3 position, Quaternion rotation)
     {
+        this.position = position;
+        this.rotation = rotation;
+
         dimension = new Dimension3D(3, 3, 3);
 
         prototypeSide = new CubeSide(new Dimension2D(dimension.X, dimension.Y));
@@ -35,8 +38,19 @@ public class Cube
     /// <summary>
     /// instantiates all needed 3D Meshes to represent this cube in 3D.
     /// </summary>
-    public void instantiateMeshes()
+    public void instantiateMeshes(GameObject fieldPrefab)
     {
-        
+        // give CubeSides a starting (A) point and rotation
+
+        /*
+         *  Vector3 pointA;
+            Vector3 pointB;
+            Quaternion rotationA;
+            Vector3 result = pointA + (pointB * rotationA);
+         */
+
+        // CubeField indexPosition is pointB
+
+        prototypeSide.instantiateMeshes(position, rotation, fieldPrefab);
     }
 }
