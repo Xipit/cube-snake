@@ -10,9 +10,14 @@ public class InstantiateManager : MonoBehaviour
     public static InstantiateManager Instance { get; private set; }
 
     // probably needs a rotation at some point, if gameobject itself has a direction
-    public void InstantiateGameObject(Vector3 position, GameObject gameObject)
+    public GameObject InstantiateGameObject(Vector3 position, Quaternion rotation, GameObject gameObject)
     {
-        Instantiate(gameObject, position, Quaternion.identity);
+        return Instantiate(gameObject, position, rotation);
+    }
+
+    public GameObject InstantiateGameObjectAsChild(Vector3 position, Quaternion rotation, GameObject gameObject, Transform parent)
+    {
+        return Instantiate(gameObject, position, rotation, parent);
     }
 
     private void Awake()

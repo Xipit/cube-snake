@@ -12,12 +12,30 @@ public class Dimension3D
     public int Y { get; }
     public int Z { get; }
 
+    /*
+     *  ^ Z
+     *  |
+     *  |   Y
+     *  | /    
+     *   /     X
+     *   ------> 
+     */
 
     public Dimension3D(int x, int y, int z)
     {
         this.X = x;
         this.Y = y;
         this.Z = z;
+    }
+
+    public Vector3 toVector3()
+    {
+        return new Vector3(X, Y, Z);
+    }
+
+    public Vector3 MultiplyBy(Vector3 vector)
+    {
+        return new Vector3(vector.x * X, vector.y * Y, vector.z * Z);
     }
 }
 
@@ -29,7 +47,14 @@ public class Dimension2D
 {
     public int A { get; }
     public int B { get; }
-    
+
+    /*
+     *  ^ B
+     *  |
+     *  |   A
+     *   ---> 
+     */
+
     public Dimension2D(int a, int b)
     {
         this.A = a;

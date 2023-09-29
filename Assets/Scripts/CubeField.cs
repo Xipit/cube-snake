@@ -14,4 +14,9 @@ public class CubeField
         this.indexX = indexX;
         this.indexY = indexY;
     }
+
+    public GameObject instantiateObject(Vector3 positionInWorld, Quaternion rotationInWorld, GameObject fieldPrefab, GameObject side)
+    {
+        return InstantiateManager.Instance.InstantiateGameObjectAsChild(positionInWorld, rotationInWorld, fieldPrefab, side.transform);
+    }
 }

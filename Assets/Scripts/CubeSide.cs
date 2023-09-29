@@ -8,16 +8,11 @@ using UnityEngine;
 /// </summary>
 public class CubeSide 
 {
-    /*
-     *  ^ B
-     *  |
-     *  |   A
-     *   ---> 
-     */
-
     private Dimension2D dimension;
     public CubeField[,] fields;
 
+    public Vector3 positionInCube;
+    public Quaternion rotationInCube;
 
     // neighbour sides
     private CubeSide northSide;
@@ -26,9 +21,12 @@ public class CubeSide
     private CubeSide westSide;
 
 
-    public CubeSide(Dimension2D dimension)
+    public CubeSide(Dimension2D dimension, Vector3 positionInCube, Quaternion rotationInCube)
     {
         this.dimension = dimension;
+        this.positionInCube = positionInCube;
+        this.rotationInCube = rotationInCube;
+
         fields = CreateFields(dimension);
     }
 
@@ -47,8 +45,15 @@ public class CubeSide
         return fields;
     }
 
-    public void instantiateMeshes(Vector3 referencePosition, Quaternion referenceRotation, GameObject fieldPrefab)
+    public GameObject instantiateObjects(Vector3 positionInWorld, Quaternion rotationInWorld, float size, GameObject fieldPrefab)
     {
+        Vector3 sidePosition = positionInWorld + positionInCube;
+        Quaternion sideRotation = rotationInWorld * rotationInCube;
+
+        GameObject side = new GameObject("Side (" + dimension.A + ", " + dimension.B + ")");
+        side.transform.position = sidePosition;
+        side.transform.rotation = sideRotation;
+            
         for (int a = 0; a < dimension.A; a++)
         {
             for (int b = 0; b < dimension.B; b++)
@@ -58,21 +63,19 @@ public class CubeSide
                     break;
                 }
 
-                /*
-                 *  Vector3 pointA;
-                    Vector3 pointB;
-                    Quaternion rotationA;
-                    Vector3 result = pointA + (pointB * rotationA);
-                 */
+                Vector3 positionInSide = new Vector3(
+                    a + size / 2,
+                    0,
+                    b + size / 2);
 
-                Vector3 position = referencePosition + (referenceRotation * new Vector3(a, 0, b));
+                Vector3 fieldPosition = positionInWorld + (rotationInWorld * (positionInCube + (rotationInCube * positionInSide)));
 
-                Debug.Log(position);
-                Debug.Log(InstantiateManager.Instance);
+                GameObject field = fields[a, b].instantiateObject(fieldPosition, sideRotation, fieldPrefab, side);
 
-
-                InstantiateManager.Instance.InstantiateGameObject(position, fieldPrefab);
+                field.name = "Field " + "[" + a + ", " + b + "]";
             }
         }
+
+        return side;
     }
 }

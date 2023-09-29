@@ -389,7 +389,7 @@ GameObject:
   - component: {fileID: 663610168}
   - component: {fileID: 663610167}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: CubeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -407,10 +407,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab7d161edf4749339b2d9f480475f50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fieldPrefab: {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4,
+  fieldPrefab: {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838,
     type: 3}
-  prototypeCubePosition: {x: 0, y: 5, z: 0.2}
-  prototypeCubeRotation: {x: 45, y: 80, z: 0}
+  dimensionAsVector: {x: 2, y: 5, z: 4}
+  prototypeCubePosition: {x: 0, y: 0, z: 0}
+  prototypeCubeRotation: {x: 0, y: 0, z: 0}
 --- !u!4 &663610168
 Transform:
   m_ObjectHideFlags: 0
