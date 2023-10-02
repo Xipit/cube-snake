@@ -1,21 +1,19 @@
-﻿using System.Linq;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEditor;
 
-namespace TutorialInfo.Scripts.Snake
+namespace Snake
 {
-    [CustomEditor(typeof(Line))]
+    [CustomEditor(typeof(Path))]
     public class LineInspector: Editor
     {
+        
+        // this is only for testing purposes as long as there is no real snake
         private void OnSceneGUI()
         {
-            var line = target as Line;
+            var line = target as Path;
 
             if (line.path != null)
             {
-                var handleTransform = line.transform;
-                var p0 = handleTransform.TransformPoint(line.p0);
-            
                 // draw Line
                 Handles.color = Color.white;
 
@@ -26,8 +24,6 @@ namespace TutorialInfo.Scripts.Snake
                         Handles.DrawLine(line.path[i], line.path[i+1]);
                     }
                 }
-                
-                // Handles.DrawLine(line.path.First(), line.path.Last());
             }
 
             

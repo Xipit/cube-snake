@@ -1,4 +1,4 @@
-﻿namespace TutorialInfo.Scripts.Snake
+﻿namespace Snake
 {
     public enum MovementDirection
     {
