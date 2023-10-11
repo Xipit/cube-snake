@@ -387,31 +387,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 663610168}
-  - component: {fileID: 663610167}
+  - component: {fileID: 663610169}
   m_Layer: 0
-  m_Name: CubeManager
+  m_Name: CubeSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &663610167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 663610166}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ab7d161edf4749339b2d9f480475f50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fieldPrefab: {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838,
-    type: 3}
-  dimensionAsVector: {x: 2, y: 5, z: 4}
-  prototypeCubePosition: {x: 0, y: 0, z: 0}
-  prototypeCubeRotation: {x: 0, y: 0, z: 0}
 --- !u!4 &663610168
 Transform:
   m_ObjectHideFlags: 0
@@ -427,6 +410,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &663610169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 663610166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ab7d161edf4749339b2d9f480475f50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CubePreset: {fileID: 3760917578416734546, guid: 8c61afb642ef842aea5aa8c6c661a59e,
+    type: 3}
+  FieldPrefab: {fileID: 3113959631259598689, guid: 06437d99b014f409493682fe9ef59df0,
+    type: 3}
+  TunnelPrefab: {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4,
+    type: 3}
+  DimensionAsVector: {x: 2, y: 3, z: 4}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
