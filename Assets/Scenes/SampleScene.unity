@@ -250,34 +250,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 715006454}
-  - component: {fileID: 715006453}
   - component: {fileID: 715006455}
   m_Layer: 0
-  m_Name: Snake Path
+  m_Name: Snake Path Script Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &715006453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 715006452}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b41dfb84c34715a40b9c165685c8aeb4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startPosition: {x: 0, y: 0, z: 0}
-  path: []
-  startLength: 3
-  lengthOfMove: 1
-  movementDirection: 1
-  snakeUpdateInterval: 0.4
-  stepsPerMove: 10
 --- !u!4 &715006454
 Transform:
   m_ObjectHideFlags: 0
