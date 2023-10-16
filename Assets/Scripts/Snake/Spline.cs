@@ -54,6 +54,7 @@ namespace Snake
             newKnot.TangentOut = new float3(0, 0, 0.33f);
  
             splinePath.Spline.Add(newKnot);
+            splinePath.Spline.RemoveAt(0);
         }
     
         private void UpdateMovementDirection()
