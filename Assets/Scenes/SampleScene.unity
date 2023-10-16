@@ -285,7 +285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9a86fb6d99f374cb8bcf4cd7731e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SplinePath: {fileID: 1508151802}
+  splinePath: {fileID: 0}
   lengthOfMove: 1
   snakeUpdateInterval: 0.4
   movementDirection: 1

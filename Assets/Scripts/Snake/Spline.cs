@@ -1,101 +1,106 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using Snake;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
 
-public class Spline : MonoBehaviour
+namespace Snake
 {
-    public SplineContainer SplinePath;
+    public class Spline : MonoBehaviour
+    {
+        public SplineContainer splinePath;
 
-    public float lengthOfMove;
-    public float snakeUpdateInterval;
+        public float lengthOfMove;
+        public float snakeUpdateInterval;
     
-    public MovementDirection movementDirection;
-    private MovementDirection currentDirection;
+        public MovementDirection movementDirection;
+        private MovementDirection currentDirection;
 
-    private void Start()
-    {
-        currentDirection = movementDirection;
-        InvokeRepeating(nameof(SplineUpdate), 1f, snakeUpdateInterval);
-    }
+        private void Start()
+        {
+            currentDirection = movementDirection;
+            InvokeRepeating(nameof(UpdateSpline), snakeUpdateInterval, snakeUpdateInterval);
+            InvokeRepeating(nameof(UpdateCurrentDirection), snakeUpdateInterval * 0.75f, snakeUpdateInterval);
+        }
     
-    private void Update()
-    {
-        UpdateMovementDirection();
-    }
+        private void Update()
+        {
+            UpdateMovementDirection();
+        }
 
-    private void SplineUpdate()
-    {
-        var lastKnot = SplinePath.Spline.ToArray().Last();
-        var newKnot = new BezierKnot();
+        private void UpdateCurrentDirection()
+        {
+            var lastKnot = splinePath.Spline.ToArray().Last();
+
+            if (currentDirection != movementDirection)
+            {
+                lastKnot.Position += (GetDirectionVector(movementDirection) -
+                                      GetDirectionVector(currentDirection)) / 2;
+                lastKnot.Rotation = GetRotation(movementDirection);
+            }
         
-        if (currentDirection != movementDirection)
-        {
-            newKnot.Position = lastKnot.Position + (GetDirectionVector(currentDirection) +
-                               GetDirectionVector(movementDirection)) / 2;
+            splinePath.Spline.SetKnot(splinePath.Spline.Count - 1, lastKnot);
+            currentDirection = movementDirection;
         }
-        else
+    
+        private void UpdateSpline()
         {
-            newKnot.Position = lastKnot.Position + GetDirectionVector(movementDirection);
-        }
+            var lastKnot = splinePath.Spline.ToArray().Last();
+            var newKnot = new BezierKnot();
 
-        newKnot.Rotation = GetRotation();
-        newKnot.TangentIn = new float3(0, 0, -0.33f);
-        newKnot.TangentOut = new float3(0, 0, 0.33f);
+            newKnot.Position = lastKnot.Position + GetDirectionVector(currentDirection);
+
+            newKnot.Rotation = GetRotation(currentDirection);
+            newKnot.TangentIn = new float3(0, 0, -0.33f);
+            newKnot.TangentOut = new float3(0, 0, 0.33f);
  
-        SplinePath.Spline.Add(newKnot);
-
-        currentDirection = movementDirection;
-    }
+            splinePath.Spline.Add(newKnot);
+        }
     
-    private void UpdateMovementDirection()
-    {
-        if (Input.GetAxis("Horizontal") < 0 && currentDirection != MovementDirection.Right)
+        private void UpdateMovementDirection()
         {
-            movementDirection = MovementDirection.Left;
+            if (Input.GetAxis("Horizontal") < 0 && currentDirection != MovementDirection.Right)
+            {
+                movementDirection = MovementDirection.Left;
+            }
+
+            if (Input.GetAxis("Horizontal") > 0 && currentDirection != MovementDirection.Left)
+            {
+                movementDirection = MovementDirection.Right;
+            }
+
+            if (Input.GetAxis("Vertical") < 0 && currentDirection != MovementDirection.Up)
+            {
+                movementDirection = MovementDirection.Down;
+            }
+
+            if (Input.GetAxis("Vertical") > 0 && currentDirection != MovementDirection.Down)
+            {
+                movementDirection = MovementDirection.Up;
+            }
         }
 
-        if (Input.GetAxis("Horizontal") > 0 && currentDirection != MovementDirection.Left)
+        private float3 GetDirectionVector(MovementDirection mD)
         {
-            movementDirection = MovementDirection.Right;
+            return mD switch
+            {
+                MovementDirection.Left => new float3(-lengthOfMove, 0, 0),
+                MovementDirection.Right => new float3(lengthOfMove, 0, 0),
+                MovementDirection.Down => new float3(0, 0, -lengthOfMove),
+                MovementDirection.Up => new float3(0, 0, lengthOfMove),
+                _ => new float3(0, 0, 0)
+            };
         }
 
-        if (Input.GetAxis("Vertical") < 0 && currentDirection != MovementDirection.Up)
+        private Quaternion GetRotation(MovementDirection mD)
         {
-            movementDirection = MovementDirection.Down;
+            return mD switch
+            {
+                MovementDirection.Left => Quaternion.Euler(0,270,0),
+                MovementDirection.Right => Quaternion.Euler(0,90,0),
+                MovementDirection.Down => Quaternion.Euler(0,180,0),
+                MovementDirection.Up => Quaternion.Euler(0,0,0),
+                _ => Quaternion.Euler(0,0,0)
+            };
         }
-
-        if (Input.GetAxis("Vertical") > 0 && currentDirection != MovementDirection.Down)
-        {
-            movementDirection = MovementDirection.Up;
-        }
-    }
-    
-    public float3 GetDirectionVector(MovementDirection mD)
-    {
-        return mD switch
-        {
-            MovementDirection.Left => new float3(-lengthOfMove, 0, 0),
-            MovementDirection.Right => new float3(lengthOfMove, 0, 0),
-            MovementDirection.Down => new float3(0, 0, -lengthOfMove),
-            MovementDirection.Up => new float3(0, 0, lengthOfMove),
-            _ => new float3(0, 0, 0)
-        };
-    }
-
-    public Quaternion GetRotation()
-    {
-        return movementDirection switch
-        {
-            MovementDirection.Left => Quaternion.Euler(0,270,0),
-            MovementDirection.Right => Quaternion.Euler(0,90,0),
-            MovementDirection.Down => Quaternion.Euler(0,180,0),
-            MovementDirection.Up => Quaternion.Euler(0,0,0),
-            _ => Quaternion.Euler(0,0,0)
-        };
     }
 }
