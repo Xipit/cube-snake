@@ -44,8 +44,8 @@ public class Spline : MonoBehaviour
         }
 
         newKnot.Rotation = GetRotation();
-        newKnot.TangentIn = new float3(0, 0, -0.5f);
-        newKnot.TangentOut = new float3(0, 0, 0.5f);
+        newKnot.TangentIn = new float3(0, 0, -0.33f);
+        newKnot.TangentOut = new float3(0, 0, 0.33f);
  
         SplinePath.Spline.Add(newKnot);
 
