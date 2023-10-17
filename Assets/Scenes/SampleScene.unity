@@ -241,7 +241,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &715006452
+--- !u!1 &461262419
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -249,22 +249,34 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 715006454}
-  - component: {fileID: 715006455}
+  - component: {fileID: 461262421}
+  - component: {fileID: 461262420}
   m_Layer: 0
-  m_Name: Snake Path Script Object
+  m_Name: InputManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &715006454
+--- !u!114 &461262420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 461262419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 818490e7b7e690c478cfe3674e9b3ac7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &461262421
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 715006452}
+  m_GameObject: {fileID: 461262419}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -273,22 +285,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &715006455
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 715006452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b9a86fb6d99f374cb8bcf4cd7731e95, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  splinePath: {fileID: 1508151802}
-  lengthOfMove: 1
-  snakeUpdateInterval: 0.4
-  movementDirection: 1
 --- !u!1 &1508151801
 GameObject:
   m_ObjectHideFlags: 0
@@ -298,6 +294,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1508151803}
+  - component: {fileID: 1508151804}
   - component: {fileID: 1508151802}
   m_Layer: 0
   m_Name: Spline
@@ -604,6 +601,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1508151804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508151801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9a86fb6d99f374cb8bcf4cd7731e95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  splinePath: {fileID: 1508151802}
+  stepLength: 1
+  stepInterval: 0.4
+  inputDirection: 1
 --- !u!1 &1588479321
 GameObject:
   m_ObjectHideFlags: 0
@@ -702,5 +715,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 1588479324}
   - {fileID: 31527607}
-  - {fileID: 715006454}
   - {fileID: 1508151803}
+  - {fileID: 461262421}
