@@ -24,11 +24,14 @@ namespace Snake
     
         private void Update()
         {
-            UpdateMovementDirection();
+            GetPlayerInput();
         }
 
         private void UpdateCurrentDirection()
         {
+            // move the last knot of the splineArray to change the direction of the snake movement, when the player
+            // changes the direction
+
             var lastKnot = splinePath.Spline.ToArray().Last();
 
             if (currentDirection != movementDirection)
@@ -44,11 +47,14 @@ namespace Snake
     
         private void UpdateSpline()
         {
+            // add a new knot to the spline
+            // head == end of splineArray
+            // tail == start of splineArray
+            
             var lastKnot = splinePath.Spline.ToArray().Last();
             var newKnot = new BezierKnot();
 
             newKnot.Position = lastKnot.Position + GetDirectionVector(currentDirection);
-
             newKnot.Rotation = GetRotation(currentDirection);
             newKnot.TangentIn = new float3(0, 0, -0.33f);
             newKnot.TangentOut = new float3(0, 0, 0.33f);
@@ -57,7 +63,7 @@ namespace Snake
             splinePath.Spline.RemoveAt(0);
         }
     
-        private void UpdateMovementDirection()
+        private void GetPlayerInput()
         {
             if (Input.GetAxis("Horizontal") < 0 && currentDirection != MovementDirection.Right)
             {
