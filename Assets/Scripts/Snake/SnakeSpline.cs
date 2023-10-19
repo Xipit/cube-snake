@@ -1,5 +1,7 @@
+using System;
 using System.Linq;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Splines;
@@ -16,12 +18,19 @@ namespace Snake
         private MovementDirection stepDirection;
         public MovementDirection inputDirection;
 
+        public GameObject snakeHead;
+        public GameObject snakeBody;
+        public GameObject snakeTail;
+        private SplineAnimate splineAnimate;
+
         private void Start()
         {
             stepDirection = inputDirection;
             
             InvokeRepeating(nameof(DetermineNextStepDirection), stepInterval * 0.75f, stepInterval);
             InvokeRepeating(nameof(UpdateSpline), stepInterval, stepInterval);
+
+            CreateSnakeBody();
         }
     
         private void Update()
@@ -68,6 +77,19 @@ namespace Snake
  
             splinePath.Spline.Add(newKnot);
             splinePath.Spline.RemoveAt(0);
+            splineAnimate.NormalizedTime = (splinePath.Spline.GetLength() -1) / splinePath.Spline.GetLength();
+            splineAnimate.Play();
+        }
+
+        private void CreateSnakeBody()
+        {
+            // Z & Y-axis shift for center alignment
+            // TODO must be changed when moving over edges
+            splineAnimate = snakeHead.GetComponent<SplineAnimate>();
+            splineAnimate.Container = splinePath;
+            splineAnimate.Loop = SplineAnimate.LoopMode.Once;
+            splineAnimate.AnimationMethod = SplineAnimate.Method.Speed;
+            splineAnimate.MaxSpeed = stepLength / stepInterval;
         }
     }
 }

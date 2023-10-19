@@ -5,7 +5,7 @@ using UnityEngine;
 # nullable enable
 public class InputManager : MonoBehaviour
 {
-    public static InputManager Instance { get; private set; }
+    public static InputManager? Instance { get; private set; }
 
     public MovementDirection? GetPlayerInput(MovementDirection stepDirection)
     {
