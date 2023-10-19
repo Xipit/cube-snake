@@ -45,6 +45,11 @@ public class CubeSide
         sideObject.transform.parent = director.transform;
         sideObject.transform.position = positionInCube;
         sideObject.transform.rotation = rotationInCube;
+
+        GameObject decorationHolderObject = new GameObject("Decorations");
+        decorationHolderObject.transform.parent = sideObject.transform;
+        decorationHolderObject.transform.position = positionInCube;
+        decorationHolderObject.transform.rotation = rotationInCube;
             
         for (int h = 0; h < Dimension.H; h++)
         {
@@ -52,15 +57,27 @@ public class CubeSide
             {
                 GameObject prefab = Fields[h, v].Tunnel != null
                     ? director.TunnelPrefab
-                    : director.FieldPrefab;
+                    : director.FieldPrefabs[(int)this.CubeSideCoordinate];
 
 
                 Vector3 positionInSide = new CubeFieldCoordinate(h, v).GetPositionInCubeSide(cubeScale);
 
                 Vector3 position = (positionInCube + (rotationInCube * positionInSide));
 
-                GameObject field = Fields[h, v].InstantiateObject(sideObject, position, rotationInCube, prefab);
-                field.name = "Field " + "[" + h + ", " + v + "]";
+                GameObject fieldObject = Fields[h, v].InstantiateObject(sideObject, position, rotationInCube, prefab);
+                fieldObject.name = "Field " + "[" + h + ", " + v + "]";
+
+
+                // spawn decoration objects between fields
+                if((h != 0 && v != 0) && Random.Range(0, 100) < director.DecorationPercentage)
+                {
+                    Vector3 decorationOffset = new Vector3(- cubeScale / 2, 0, - cubeScale / 2);
+                    Vector3 decorationPosition = (positionInCube + (rotationInCube * (positionInSide + decorationOffset)));
+
+                    GameObject decorationPrefab = director.DecorationPrefabs[(int)this.CubeSideCoordinate];
+
+                    InstantiateManager.Instance.InstantiateGameObjectAsChild(decorationPosition, rotationInCube, decorationPrefab, decorationHolderObject.transform);
+                }
             }
         }
 

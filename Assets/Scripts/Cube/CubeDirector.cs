@@ -10,15 +10,19 @@ public class CubeDirector : MonoBehaviour
 {
     public Cube? Cube;
 
-    public GameObject? FieldPrefab;
+    public GameObject[]? FieldPrefabs;
     public GameObject? TunnelPrefab;
+    public GameObject[]? DecorationPrefabs;
 
+    public int DecorationPercentage;
 
-    public void AssignCubeAndPrefabs(Cube cube, GameObject fieldPrefab, GameObject tunnelPrefab)
+    public void AssignCubeAndPrefabs(Cube cube, GameObject[] fieldPrefabs, GameObject tunnelPrefab, GameObject[] decorationPrefabs, int decorationPercentage)
     {
         this.Cube = cube;
-        this.FieldPrefab = fieldPrefab;
+        this.FieldPrefabs = fieldPrefabs;
         this.TunnelPrefab = tunnelPrefab;
+        this.DecorationPrefabs = decorationPrefabs;
+        this.DecorationPercentage = decorationPercentage;
 
         this.name = "Cube (" + cube.Dimension.X + ", " + cube.Dimension.Y + ", " + cube.Dimension.Z + ")";
     }
@@ -32,7 +36,7 @@ public class CubeDirector : MonoBehaviour
             return;
         }
         
-        if (Cube == null || !FieldPrefab || !TunnelPrefab)
+        if (Cube == null || FieldPrefabs == null || FieldPrefabs.Length != 6 || DecorationPrefabs == null || DecorationPrefabs.Length != 6 || !TunnelPrefab)
         {
             Debug.LogError("Tried to instantiateCubeContent() before assigning cube or prefabs!");
             return;

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028353, g: 0.22571383, b: 0.30692253, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -424,11 +424,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CubePreset: {fileID: 3760917578416734546, guid: 8c61afb642ef842aea5aa8c6c661a59e,
     type: 3}
-  FieldPrefab: {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838,
-    type: 3}
+  FieldPrefabs:
+  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
+  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
+  - {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4, type: 3}
+  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
+  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
+  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
   TunnelPrefab: {fileID: 3113959631259598689, guid: 06437d99b014f409493682fe9ef59df0,
     type: 3}
+  DecorationPrefabs:
+  - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
+  - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
+  - {fileID: 3113959631259598689, guid: 06437d99b014f409493682fe9ef59df0, type: 3}
+  - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
+  - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
+  - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
   DimensionAsVector: {x: 5, y: 5, z: 5}
+  DecorationPercentage: 50
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
