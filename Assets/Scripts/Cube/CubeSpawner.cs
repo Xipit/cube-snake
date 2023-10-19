@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Snake;
 using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
@@ -10,6 +11,9 @@ public class CubeSpawner : MonoBehaviour
 
     public Vector3 DimensionAsVector; // only for editing in Unity Editor
     public Dimension3D Dimension;
+
+    public SnakeSpline snakeSpline;
+    private CubeDirector director;
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +39,7 @@ public class CubeSpawner : MonoBehaviour
         }
 
         SpawnCube(Dimension, FieldPrefab, TunnelPrefab); 
+        snakeSpline.InitializeDataForSnake(this.director.Cube);
     }
 
 
@@ -44,7 +49,7 @@ public class CubeSpawner : MonoBehaviour
 
         GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObject(new Vector3(0,0,0), Quaternion.identity, CubePreset);
 
-        CubeDirector director = cubeGameObject.GetComponent<CubeDirector>();
+        director = cubeGameObject.GetComponent<CubeDirector>();
         director.AssignCubeAndPrefabs(cube, fieldPrefab, tunnelPrefab); 
         director.InstantiateCubeContent();
 
