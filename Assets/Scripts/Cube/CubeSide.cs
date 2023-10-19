@@ -52,7 +52,7 @@ public class CubeSide
             {
                 GameObject prefab = Fields[h, v].Tunnel != null
                     ? director.TunnelPrefab
-                    : director.FieldPrefab;
+                    : director.FieldPrefabs[(int)CubeSideCoordinate];
 
 
                 Vector3 positionInSide = new CubeFieldCoordinate(h, v).GetPositionInCubeSide(cubeScale);
