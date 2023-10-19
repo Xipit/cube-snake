@@ -8,6 +8,8 @@ namespace Snake
 {
     public class SnakeSpline : MonoBehaviour
     {
+        public CubeSpawner cubeSpawner;
+        public CubeSideCoordinate startSide;
         public SplineContainer splinePath;
 
         public float stepLength;
@@ -18,6 +20,8 @@ namespace Snake
 
         private void Start()
         {
+            SpawnSnake.Instance.SpawnSnakeOnCube(cubeSpawner, splinePath, startSide);
+            
             stepDirection = inputDirection;
             
             InvokeRepeating(nameof(DetermineNextStepDirection), stepInterval * 0.75f, stepInterval);
