@@ -27,6 +27,17 @@ namespace Snake
 
         public static Quaternion GetRotation(this MovementDirection direction)
         {
+            /// getField of current knot
+            /// if (nextField is on same side) {
+            ///     use cubeSide.Rotation
+            ///     return cubeSide.Rotation + MovementDirection.Rotation
+            /// }
+            /// else
+            /// {
+            ///     getNewFieldOnNewSide
+            ///     use this rotation
+            /// } 
+            
             return direction switch
             {
                 MovementDirection.Left => Quaternion.Euler(0,270,0),

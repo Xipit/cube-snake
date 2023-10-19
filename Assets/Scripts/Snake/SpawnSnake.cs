@@ -9,17 +9,23 @@ public class SpawnSnake : MonoBehaviour
 {
     public static SpawnSnake Instance { get; private set; }
 
-    public void SpawnSnakeOnCube(CubeSpawner cube, SplineContainer splinePath, CubeSideCoordinate startSide)
+    private CubePoint startPoint;
+
+    public void SpawnSnakeOnCube(Cube cube, SplineContainer splinePath, CubeSideCoordinate startSide)
     {
+        if (cube == null)
+        {
+            return;
+        }
+        
         Vector3 positionInCube = startSide.GetPositionInCube(cube.Dimension, 1f); //TODO cubeScale -> variable
         Quaternion rotationInCube = startSide.GetRotationInCube();
 
-        CubeFieldCoordinate startField = startSide.GetDimension2D(cube.Dimension).GetRandomFieldCoordinate();
-        Vector3 positionInSide = startField.GetPositionInCubeSide(1f); // TODO change cubescale to variable
+        CubeFieldCoordinate startFieldCoordinate = startSide.GetDimension2D(cube.Dimension).GetRandomFieldCoordinate();
+        Vector3 positionInSide = startFieldCoordinate.GetPositionInCubeSide(1f); // TODO change cubescale to variable
 
         Vector3 startPositionOfSnake = positionInCube + rotationInCube * positionInSide;
-        
-        
+
         BezierKnot startKnot = new BezierKnot();
         startKnot.Position = startPositionOfSnake;
         startKnot.Rotation = rotationInCube;
@@ -29,6 +35,12 @@ public class SpawnSnake : MonoBehaviour
         splinePath.Spline.Add(startKnot);
 
 
+        startPoint = new CubePoint(startSide, startFieldCoordinate);
+    }
+
+    public CubePoint GetStartPoint()
+    {
+        return startPoint;
     }
 
     private void Awake()

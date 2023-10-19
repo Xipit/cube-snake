@@ -424,14 +424,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CubePreset: {fileID: 3760917578416734546, guid: 8c61afb642ef842aea5aa8c6c661a59e,
     type: 3}
-  FieldPrefabs:
-  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
-  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
-  - {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4, type: 3}
-  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
-  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
-  - {fileID: 8450598619300175934, guid: a2dbf8b118e7946a583be8a6608bf838, type: 3}
-  TunnelPrefab: {fileID: 3113959631259598689, guid: 06437d99b014f409493682fe9ef59df0,
+  FieldPrefab: {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4,
     type: 3}
   DecorationPrefabs:
   - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
@@ -445,7 +438,8 @@ MonoBehaviour:
   - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
   TunnelPrefab: {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4,
     type: 3}
-  DimensionAsVector: {x: 4, y: 3, z: 4}
+  DimensionAsVector: {x: 4, y: 5, z: 6}
+  snakeSpline: {fileID: 1345266145}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -566,11 +560,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9a86fb6d99f374cb8bcf4cd7731e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cubeSpawner: {fileID: 663610169}
   startSide: 0
   splinePath: {fileID: 1345266144}
   stepLength: 1
-  stepInterval: 1
+  stepInterval: 0.7
   inputDirection: 1
 --- !u!4 &1345266146
 Transform:
