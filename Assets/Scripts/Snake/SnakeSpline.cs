@@ -84,16 +84,14 @@ namespace Snake
         private void DetermineNextStepDirection()
         {
             // TODO move the knot to the right point
+            CubePoint lastPoint = pointsOfSnake.Last();
             
             BezierKnot lastKnot = splinePath.Spline.ToArray().Last();
 
             if (stepDirection != inputDirection)
             {
-                Vector3 directionVector = (inputDirection.GetDirectionVector(stepLength) -
-                                           stepDirection.GetDirectionVector(stepLength)) / 2;
-                lastKnot.Position += (float3)directionVector;
-                
-                lastKnot.Rotation = inputDirection.GetRotation();
+                lastKnot.Position = GetNextPositionVector(lastPoint);
+                lastKnot.Rotation = GetNextRotation(lastPoint);
             }
         
             splinePath.Spline.SetKnot(splinePath.Spline.Count - 1, lastKnot);
@@ -117,24 +115,46 @@ namespace Snake
             Debug.Log("SideCoordinate: " + nextPoint.SideCoordinate 
                                          + ", FieldCoordinate: " + nextPoint.FieldCoordinate.H 
                                          + " / " + nextPoint.FieldCoordinate.V);
-
-            pointsOfSnake.Add(nextPoint);
-
-            // TODO use nextPoint to get the next knot
-            Vector3 positionInCube = nextPoint.SideCoordinate.GetPositionInCube(cube.Dimension, 1f); //TODO cubeScale -> variable
-            Quaternion rotationInCube = nextPoint.SideCoordinate.GetRotationInCube();
-            Vector3 positionInSide = nextPoint.FieldCoordinate.GetPositionInCubeSide(1f); // TODO change cubescale to variable
-
-            Vector3 nextPointVector = positionInCube + rotationInCube * positionInSide;
             
-            
-            newKnot.Position = nextPointVector; // lastKnot.Position + (float3)stepDirection.GetDirectionVector(stepLength);
-            newKnot.Rotation = nextPoint.SideCoordinate.GetRotationInCube();
+            newKnot.Position = GetNextPositionVector(nextPoint);
+            newKnot.Rotation = GetNextRotation(nextPoint);
             newKnot.TangentIn = new float3(0, 0, -0.33f);
             newKnot.TangentOut = new float3(0, 0, 0.33f);
  
             splinePath.Spline.Add(newKnot);
             splinePath.Spline.RemoveAt(0);
+            
+            pointsOfSnake.Add(nextPoint);
+            pointsOfSnake.RemoveAt(0);
+        }
+
+        private Vector3 GetNextPositionVector(CubePoint nextPoint)
+        {
+            Vector3 positionInCube = nextPoint.SideCoordinate.GetPositionInCube(cube.Dimension, 1f); //TODO cubeScale -> variable
+            Quaternion rotationInCube = nextPoint.SideCoordinate.GetRotationInCube();
+            // position in the center of a field
+            Vector3 positionInSide = nextPoint.FieldCoordinate.GetPositionInCubeSide(1f); // TODO change cubescale to variable
+
+            // set position to the edge of a field
+            positionInSide += stepDirection switch
+            {
+                MovementDirection.Up => new Vector3(0, 0, -0.5f),
+                MovementDirection.Right => new Vector3(-0.5f, 0, 0),
+                MovementDirection.Down => new Vector3(0, 0, 0.5f),
+                MovementDirection.Left => new Vector3(0.5f, 0, 0),
+                _ => new Vector3(0, 0, 0)
+            };
+            
+            return positionInCube + rotationInCube * positionInSide;
+        }
+
+        private Quaternion GetNextRotation(CubePoint nextPoint)
+        {
+            Quaternion sideRotation = nextPoint.SideCoordinate.GetRotationInCube();
+
+            /// TODO get rotation in stepDirection
+            
+            return sideRotation;
         }
 
         private CubePoint GetNextFieldOnCube()
@@ -144,6 +164,7 @@ namespace Snake
             
             // !!! Currently the local system equals up, down, ...
             // TODO edit inputManager
+            // TODO when sideSwitch --> rotate cube (view)
             
             switch (stepDirection)
             {
@@ -157,7 +178,8 @@ namespace Snake
                     }
                     else
                     {
-                        nextPoint = GetPointOnNeighbour(DirectionOnCubeSide.posVert, currentPoint); // TODO posVert isn't it always
+                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.posVert, cube); // TODO posVert isn't it always
+                        
                     }
                     break;
                 
@@ -171,7 +193,7 @@ namespace Snake
                     }
                     else
                     {
-                        nextPoint = GetPointOnNeighbour(DirectionOnCubeSide.negVert, currentPoint);
+                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.negVert, cube);
                     }
                     break;
 
@@ -185,7 +207,7 @@ namespace Snake
                     }
                     else
                     {
-                        nextPoint = GetPointOnNeighbour(DirectionOnCubeSide.posHor, currentPoint);
+                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.posHor, cube);
                     }
                     break;
                 
@@ -199,7 +221,7 @@ namespace Snake
                     }
                     else
                     {
-                        nextPoint = GetPointOnNeighbour(DirectionOnCubeSide.negHor, currentPoint);
+                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.negHor, cube);
                     }
                     break;
                 default:
@@ -207,80 +229,6 @@ namespace Snake
             }
 
             return nextPoint;
-        }
-
-        
-        private CubePoint GetPointOnNeighbour(DirectionOnCubeSide currentDirectionOnSide, CubePoint currentPoint)
-        {
-            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
-                currentPoint.SideCoordinate.GetNeighborWithDirection(currentDirectionOnSide);
-
-            int neighbourMaxH = cube.Sides[(int)nextSide.neighborCoordinate].Dimension.H;
-            int neighbourMaxV = cube.Sides[(int)nextSide.neighborCoordinate].Dimension.V;
-
-            int currentH = currentPoint.FieldCoordinate.H;
-            int currentV = currentPoint.FieldCoordinate.V;
-
-            CubeFieldCoordinate? nextLocalField = null;
-
-            switch (currentDirectionOnSide)
-            {
-                // snake moves negHor on current Side
-                case DirectionOnCubeSide.negHor:
-                    nextLocalField = nextSide.neighborDirection switch
-                    {
-                        DirectionOnCubeSide.negHor => new CubeFieldCoordinate(neighbourMaxH, currentV),
-                        DirectionOnCubeSide.posHor => new CubeFieldCoordinate(0, neighbourMaxV - currentV),
-                        DirectionOnCubeSide.negVert => new CubeFieldCoordinate(neighbourMaxH - currentV, neighbourMaxV),
-                        DirectionOnCubeSide.posVert => new CubeFieldCoordinate(currentV, 0),
-                        _ => null
-                    };
-                    break;
-                
-                // snake moves posHor on current Side
-                case DirectionOnCubeSide.posHor:
-                    nextLocalField = nextSide.neighborDirection switch
-                    {
-                        DirectionOnCubeSide.negHor => new CubeFieldCoordinate(neighbourMaxH, neighbourMaxV - currentV),
-                        DirectionOnCubeSide.posHor => new CubeFieldCoordinate(0, currentV),
-                        DirectionOnCubeSide.negVert => new CubeFieldCoordinate(currentV, neighbourMaxV),
-                        DirectionOnCubeSide.posVert => new CubeFieldCoordinate(neighbourMaxH - currentV, 0),
-                        _ => null
-                    };
-                    break;
-                
-                // snake moves negVert on current Side
-                case DirectionOnCubeSide.negVert:
-                    nextLocalField = nextSide.neighborDirection switch
-                    {
-                        DirectionOnCubeSide.negHor => new CubeFieldCoordinate(neighbourMaxH, neighbourMaxV - currentH),
-                        DirectionOnCubeSide.posHor => new CubeFieldCoordinate(0, currentH),
-                        DirectionOnCubeSide.negVert => new CubeFieldCoordinate(currentH, neighbourMaxV),
-                        DirectionOnCubeSide.posVert => new CubeFieldCoordinate(neighbourMaxH - currentH, 0),
-                        _ => null
-                    };
-                    break;
-                    
-                // snake moves posVert on current Side
-                case DirectionOnCubeSide.posVert:
-                    nextLocalField = nextSide.neighborDirection switch
-                    {
-                        DirectionOnCubeSide.negHor => new CubeFieldCoordinate(neighbourMaxH, currentH),
-                        DirectionOnCubeSide.posHor => new CubeFieldCoordinate(0,  neighbourMaxV - currentH),
-                        DirectionOnCubeSide.negVert => new CubeFieldCoordinate(neighbourMaxH - currentH, neighbourMaxV),
-                        DirectionOnCubeSide.posVert => new CubeFieldCoordinate(currentH, 0),
-                        _ => null
-                    };
-                    break;
-            }
-
-            if (nextLocalField == null)
-            {
-                Debug.LogError("local field on neighbour side could not be found");
-                return new CubePoint(CubeSideCoordinate.Front, new CubeFieldCoordinate(0,0));
-            }
-            
-            return new CubePoint(nextSide.neighborCoordinate, nextLocalField);
         }
     }
 }

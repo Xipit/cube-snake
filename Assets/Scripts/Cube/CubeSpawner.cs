@@ -9,6 +9,8 @@ public class CubeSpawner : MonoBehaviour
     public GameObject FieldPrefab;
     public GameObject TunnelPrefab;
 
+    public GameObject CubeSnakeHolder;
+
     public Vector3 DimensionAsVector; // only for editing in Unity Editor
     public Dimension3D Dimension;
 
@@ -47,7 +49,7 @@ public class CubeSpawner : MonoBehaviour
     {
         Cube cube = new Cube(dimension);
 
-        GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObject(new Vector3(0,0,0), Quaternion.identity, CubePreset);
+        GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObjectAsChild(new Vector3(0,0,0), Quaternion.identity, CubePreset, CubeSnakeHolder.transform);
 
         director = cubeGameObject.GetComponent<CubeDirector>();
         director.AssignCubeAndPrefabs(cube, fieldPrefab, tunnelPrefab); 
