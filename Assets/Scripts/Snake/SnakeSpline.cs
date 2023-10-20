@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -21,7 +22,12 @@ namespace Snake
         public GameObject snakeHead;
         public GameObject snakeBody;
         public GameObject snakeTail;
-        private SplineAnimate splineAnimate;
+
+        /* private SplineAnimate headAnimate; */
+        private List<SplineAnimate> bodyAnimators;
+        /* private SplineAnimate tailAnimate; */
+
+        private List<GameObject> bodyParts;
 
         private void Start()
         {
@@ -30,7 +36,12 @@ namespace Snake
             InvokeRepeating(nameof(DetermineNextStepDirection), stepInterval * 0.75f, stepInterval);
             InvokeRepeating(nameof(UpdateSpline), stepInterval, stepInterval);
 
-            CreateSnakeBody();
+            // List Initializations
+            bodyAnimators = new List<SplineAnimate>();
+            bodyParts = new List<GameObject>();
+
+            GetSnakeAnimators();
+            Debug.Log("Länge Spline: " + splinePath.Spline.GetLength());
         }
     
         private void Update()
@@ -77,19 +88,57 @@ namespace Snake
  
             splinePath.Spline.Add(newKnot);
             splinePath.Spline.RemoveAt(0);
-            splineAnimate.NormalizedTime = (splinePath.Spline.GetLength() -1) / splinePath.Spline.GetLength();
-            splineAnimate.Play();
+
+            // animate Head
+            /* headAnimate.NormalizedTime = (splinePath.Spline.GetLength() -1) / splinePath.Spline.GetLength();
+            headAnimate.Play(); */
+
+            // animate Body Parts
+            for (int i = 0; i<bodyAnimators.Count; i++)
+            {
+                bodyAnimators[i].NormalizedTime = i * (1.0f/bodyAnimators.Count);
+                bodyAnimators[i].Play();
+            }
         }
 
-        private void CreateSnakeBody()
+        private void GetSnakeAnimators()
         {
-            // Z & Y-axis shift for center alignment
-            // TODO must be changed when moving over edges
-            splineAnimate = snakeHead.GetComponent<SplineAnimate>();
-            splineAnimate.Container = splinePath;
-            splineAnimate.Loop = SplineAnimate.LoopMode.Once;
-            splineAnimate.AnimationMethod = SplineAnimate.Method.Speed;
-            splineAnimate.MaxSpeed = stepLength / stepInterval;
+            // Iterate Spline and Configure Animators for Each Body Part
+            Debug.Log("Obergrenze: " + ((splinePath.Spline.GetLength()-2)*2));
+            for (int i = 1; i<(splinePath.Spline.GetLength()-2)*2; i++ ) 
+            {
+                Debug.Log("Spline kleiner counter: " + i);
+                if (i > (splinePath.Spline.GetLength()-3)*2)
+                {
+                    // Empty
+                    Debug.Log("Empty");
+                    Debug.Log((splinePath.Spline.GetLength() *2)-2);
+                }
+                else if (i == 1)
+                {
+                    // Tail
+                    bodyParts.Add(Instantiate(snakeTail));
+                    Debug.Log("Tail");
+                }
+                else if (i == (splinePath.Spline.GetLength()-3)*2)
+                {
+                    // Head
+                    bodyParts.Add(Instantiate(snakeHead));
+                    Debug.Log("Head");
+                }
+                else {
+                    // Body
+                    bodyParts.Add(Instantiate(snakeBody));
+                    Debug.Log("Body");
+                }
+
+                SplineAnimate animate = bodyParts[i-1].GetComponent<SplineAnimate>();
+                animate.Container = splinePath;
+                animate.Loop = SplineAnimate.LoopMode.Once;
+                animate.AnimationMethod = SplineAnimate.Method.Speed;
+                animate.MaxSpeed = stepLength / stepInterval;
+                bodyAnimators.Add(animate);
+            }
         }
     }
 }
