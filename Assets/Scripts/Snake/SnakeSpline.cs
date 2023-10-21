@@ -23,38 +23,12 @@ namespace Snake
         
         public SplineContainer splinePath;
 
-        public float stepLength;
         public float stepInterval;
     
         private MovementDirection stepDirection;
         public MovementDirection inputDirection;
-        
-        /*private void Start()
-        {
-            Debug.Log("Awake is called");
-            if (this.CubePreset.TryGetComponent<CubeDirector>(out CubeDirector director)
-                && (director == null || (director != null && !director.enabled)))
-            {
-                Debug.LogError("CubePreset Prefab does not have necessary CubeDirector Script attached or enabled!");
-                return;
-            }
 
-            Debug.Log(director.Cube.Dimension.X.ToString());
-            cubeDirector = director;
-            cube = cubeDirector.Cube;
-
-            SpawnSnake.Instance.SpawnSnakeOnCube(CubeSpawner, splinePath, startSide);
-            pointsOfSnake = new List<CubePoint>
-            {
-                SpawnSnake.Instance.GetStartPoint()
-            };
-            Debug.Log("SideCoordinate: " + pointsOfSnake.First().SideCoordinate + ", FieldCoordinate: " + pointsOfSnake.First().FieldCoordinate.H + " / " + pointsOfSnake.First().FieldCoordinate.V);
-
-            stepDirection = inputDirection;
-            
-            InvokeRepeating(nameof(DetermineNextStepDirection), stepInterval * 0.75f, stepInterval);
-            InvokeRepeating(nameof(UpdateSpline), stepInterval, stepInterval);
-        }*/
+        private DirectionOnCubeSide currentInputUpDirection;
 
         public void InitializeDataForSnake(Cube cube)
         {
@@ -65,9 +39,10 @@ namespace Snake
             {
                 SpawnSnake.Instance.GetStartPoint()
             };
-            Debug.Log("SideCoordinate: " + pointsOfSnake.First().SideCoordinate + ", FieldCoordinate: " + pointsOfSnake.First().FieldCoordinate.H + " / " + pointsOfSnake.First().FieldCoordinate.V);
-
-            stepDirection = inputDirection;
+            
+            UpdateStepDirection(inputDirection);
+            // it is posVert because the startSide is the front side
+            currentInputUpDirection = DirectionOnCubeSide.posVert;
             
             InvokeRepeating(nameof(DetermineNextStepDirection), stepInterval * 0.75f, stepInterval);
             InvokeRepeating(nameof(UpdateSpline), stepInterval, stepInterval);
@@ -95,7 +70,12 @@ namespace Snake
             }
         
             splinePath.Spline.SetKnot(splinePath.Spline.Count - 1, lastKnot);
-            stepDirection = inputDirection;
+            UpdateStepDirection(inputDirection);
+        }
+
+        private void UpdateStepDirection(MovementDirection direction)
+        {
+            stepDirection = direction;
         }
     
         /// <summary>
@@ -106,15 +86,10 @@ namespace Snake
             // add a new knot to the spline
             // head == end of splineArray
             // tail == start of splineArray
-
-            BezierKnot lastKnot = splinePath.Spline.ToArray().Last();
+            
             BezierKnot newKnot = new BezierKnot();
-
-
-            CubePoint nextPoint = GetNextFieldOnCube();
-            Debug.Log("SideCoordinate: " + nextPoint.SideCoordinate 
-                                         + ", FieldCoordinate: " + nextPoint.FieldCoordinate.H 
-                                         + " / " + nextPoint.FieldCoordinate.V);
+            
+            CubePoint nextPoint = GetNextPointOnCube();
             
             newKnot.Position = GetNextPositionVector(nextPoint);
             newKnot.Rotation = GetNextRotation(nextPoint);
@@ -130,10 +105,11 @@ namespace Snake
 
         private Vector3 GetNextPositionVector(CubePoint nextPoint)
         {
-            Vector3 positionInCube = nextPoint.SideCoordinate.GetPositionInCube(cube.Dimension, 1f); //TODO cubeScale -> variable
+            Vector3 positionInCube = nextPoint.SideCoordinate.GetPositionInCube(cube.Dimension, cube.Scale); 
             Quaternion rotationInCube = nextPoint.SideCoordinate.GetRotationInCube();
+            
             // position in the center of a field
-            Vector3 positionInSide = nextPoint.FieldCoordinate.GetPositionInCubeSide(1f); // TODO change cubescale to variable
+            Vector3 positionInSide = nextPoint.FieldCoordinate.GetPositionInCubeSide(cube.Scale);
 
             // set position to the edge of a field
             positionInSide += stepDirection switch
@@ -157,76 +133,77 @@ namespace Snake
             return sideRotation;
         }
 
-        private CubePoint GetNextFieldOnCube()
+        private CubePoint GetNextPointOnCube()
         {
             CubePoint currentPoint = pointsOfSnake.Last();
-            CubePoint nextPoint = currentPoint;
-            
-            // !!! Currently the local system equals up, down, ...
-            // TODO edit inputManager
-            // TODO when sideSwitch --> rotate cube (view)
-            
-            switch (stepDirection)
+            CubePoint nextPoint;
+
+            DirectionOnCubeSide inputDirectionOnCubeSide =
+                CubeSnakeHolderManager.Instance.TranslateInputDirectionToDirectionOnSide(stepDirection, currentInputUpDirection);
+
+            nextPoint = inputDirectionOnCubeSide switch
             {
-                case MovementDirection.Up:
-                    if (currentPoint.FieldCoordinate.V < cube.Sides[(int)currentPoint.SideCoordinate].Dimension.V)
-                    {
-                        CubeFieldCoordinate nextFieldCoordinate =
-                            new CubeFieldCoordinate(currentPoint.FieldCoordinate.H, currentPoint.FieldCoordinate.V + 1);
-                        
-                        nextPoint = new CubePoint(currentPoint.SideCoordinate, nextFieldCoordinate);
-                    }
-                    else
-                    {
-                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.posVert, cube); // TODO posVert isn't it always
-                        
-                    }
-                    break;
-                
-                case MovementDirection.Down:
-                    if (currentPoint.FieldCoordinate.V > 0)
-                    {
-                        CubeFieldCoordinate nextFieldCoordinate =
-                            new CubeFieldCoordinate(currentPoint.FieldCoordinate.H, currentPoint.FieldCoordinate.V - 1);
+                DirectionOnCubeSide.negHor => GetNextPoint(currentPoint, new Vector2(-1, 0), inputDirectionOnCubeSide),
+                DirectionOnCubeSide.posHor => GetNextPoint(currentPoint, new Vector2(1, 0), inputDirectionOnCubeSide),
+                DirectionOnCubeSide.negVert => GetNextPoint(currentPoint, new Vector2(0, -1), inputDirectionOnCubeSide),
+                DirectionOnCubeSide.posVert => GetNextPoint(currentPoint, new Vector2(0, 1), inputDirectionOnCubeSide),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
-                        nextPoint = new CubePoint(currentPoint.SideCoordinate, nextFieldCoordinate);
-                    }
-                    else
-                    {
-                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.negVert, cube);
-                    }
-                    break;
+            return nextPoint;
+        }
 
-                case MovementDirection.Right:
-                    if (currentPoint.FieldCoordinate.H < cube.Sides[(int)currentPoint.SideCoordinate].Dimension.H)
-                    {
-                        CubeFieldCoordinate nextFieldCoordinate =
-                            new CubeFieldCoordinate(currentPoint.FieldCoordinate.H + 1, currentPoint.FieldCoordinate.V);
+        private bool PointIsOnSameSide(CubePoint currentPoint, Vector2 vectorToNextPoint)
+        {
+            int maxH = cube.Sides[(int)currentPoint.SideCoordinate].Dimension.H;
+            int maxV = cube.Sides[(int)currentPoint.SideCoordinate].Dimension.V;
 
-                        nextPoint = new CubePoint(currentPoint.SideCoordinate, nextFieldCoordinate);
-                    }
-                    else
-                    {
-                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.posHor, cube);
-                    }
-                    break;
-                
-                case MovementDirection.Left:
-                    if (currentPoint.FieldCoordinate.H > 0)
-                    {
-                        CubeFieldCoordinate nextFieldCoordinate =
-                            new CubeFieldCoordinate(currentPoint.FieldCoordinate.H - 1, currentPoint.FieldCoordinate.V);
+            int H = currentPoint.FieldCoordinate.H;
+            int V = currentPoint.FieldCoordinate.V;
 
-                        nextPoint = new CubePoint(currentPoint.SideCoordinate, nextFieldCoordinate);
-                    }
-                    else
-                    {
-                        nextPoint = currentPoint.GetPointOnNeighbour(DirectionOnCubeSide.negHor, cube);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            if (H + vectorToNextPoint.x < maxH &&
+                H + vectorToNextPoint.x >= 0 &&
+                V + vectorToNextPoint.y < maxV &&
+                V + vectorToNextPoint.y >= 0)
+            {
+                return true;
             }
+
+            return false;
+        }
+
+        private CubePoint GetNextPoint(CubePoint currentPoint, Vector2 vectorToNextPoint, DirectionOnCubeSide currentDirectionOnCubeSide)
+        {
+            if (PointIsOnSameSide(currentPoint, vectorToNextPoint))
+            {
+                return GetPointOnSide(currentPoint, vectorToNextPoint);
+            }
+            else
+            {
+                return GetPointOnNextSide(currentPoint, currentDirectionOnCubeSide);
+            }
+        }
+
+        private CubePoint GetPointOnSide(CubePoint currentPoint, Vector2 vectorToNextPoint)
+        {
+            CubeFieldCoordinate nextFieldCoordinate =
+                new CubeFieldCoordinate(currentPoint.FieldCoordinate.H + (int)vectorToNextPoint.x, 
+                                        currentPoint.FieldCoordinate.V + (int)vectorToNextPoint.y);
+
+            return new CubePoint(currentPoint.SideCoordinate, nextFieldCoordinate);
+        }
+
+        private CubePoint GetPointOnNextSide(CubePoint currentPoint, DirectionOnCubeSide currentDirectionOnCubeSide)
+        {
+            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
+                currentPoint.SideCoordinate.GetNeighborWithDirection(currentDirectionOnCubeSide);
+
+            CubePoint nextPoint = currentPoint.GetPointOnNeighbour(currentDirectionOnCubeSide, cube);
+                
+            currentInputUpDirection =
+                CubeSnakeHolderManager.Instance.GetInputUpAsDirectionOnCubeSide(stepDirection, nextSide.neighborDirection);
+
+            CubeSnakeHolderManager.Instance.RotateCubeSnakeHolder(stepDirection);
 
             return nextPoint;
         }

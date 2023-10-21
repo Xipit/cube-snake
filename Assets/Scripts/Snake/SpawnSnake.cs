@@ -10,6 +10,7 @@ public class SpawnSnake : MonoBehaviour
     public static SpawnSnake Instance { get; private set; }
 
     private CubePoint startPoint;
+    private DirectionOnCubeSide startDirection;
 
     public void SpawnSnakeOnCube(Cube cube, SplineContainer splinePath, CubeSideCoordinate startSide)
     {
@@ -18,11 +19,11 @@ public class SpawnSnake : MonoBehaviour
             return;
         }
         
-        Vector3 positionInCube = startSide.GetPositionInCube(cube.Dimension, 1f); //TODO cubeScale -> variable
+        Vector3 positionInCube = startSide.GetPositionInCube(cube.Dimension, cube.Scale);
         Quaternion rotationInCube = startSide.GetRotationInCube();
 
         CubeFieldCoordinate startFieldCoordinate = startSide.GetDimension2D(cube.Dimension).GetRandomFieldCoordinate();
-        Vector3 positionInSide = startFieldCoordinate.GetPositionInCubeSide(1f); // TODO change cubescale to variable
+        Vector3 positionInSide = startFieldCoordinate.GetPositionInCubeSide(cube.Scale);
 
         Vector3 startPositionOfSnake = positionInCube + rotationInCube * positionInSide;
 
@@ -33,8 +34,7 @@ public class SpawnSnake : MonoBehaviour
         startKnot.TangentOut = new float3(0, 0, 0.33f);
 
         splinePath.Spline.Add(startKnot);
-
-
+        
         startPoint = new CubePoint(startSide, startFieldCoordinate);
     }
 

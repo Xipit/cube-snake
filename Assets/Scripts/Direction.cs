@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,3 +25,19 @@ public enum DirectionOnCubeSide
  *  |   H (orizontal)
  *   ---> 
  */
+
+
+static class DirectionOnCubeSideMethods
+{
+    public static DirectionOnCubeSide InvertDirection(this DirectionOnCubeSide direction)
+    {
+        return direction switch
+        {
+            DirectionOnCubeSide.negHor => DirectionOnCubeSide.posHor,
+            DirectionOnCubeSide.posHor => DirectionOnCubeSide.negHor,
+            DirectionOnCubeSide.negVert => DirectionOnCubeSide.posVert,
+            DirectionOnCubeSide.posVert => DirectionOnCubeSide.negVert,
+            _ => direction
+        };
+    }
+}
