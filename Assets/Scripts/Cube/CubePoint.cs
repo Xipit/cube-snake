@@ -26,8 +26,8 @@ public class CubePoint
             (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
                 this.SideCoordinate.GetNeighborWithDirection(currentDirectionOnSide);
 
-            int neighbourMaxH = cube.Sides[(int)nextSide.neighborCoordinate].Dimension.H;
-            int neighbourMaxV = cube.Sides[(int)nextSide.neighborCoordinate].Dimension.V;
+            int neighbourMaxH = cube.Sides[(int)nextSide.neighborCoordinate].Dimension.H - 1;
+            int neighbourMaxV = cube.Sides[(int)nextSide.neighborCoordinate].Dimension.V - 1;
 
             int currentH = this.FieldCoordinate.H;
             int currentV = this.FieldCoordinate.V;

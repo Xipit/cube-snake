@@ -439,7 +439,7 @@ MonoBehaviour:
   TunnelPrefab: {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4,
     type: 3}
   CubeSnakeHolder: {fileID: 2008436921}
-  DimensionAsVector: {x: 4, y: 5, z: 6}
+  DimensionAsVector: {x: 3, y: 4, z: 5}
   snakeSpline: {fileID: 1345266145}
 --- !u!1 &832575517
 GameObject:
@@ -563,8 +563,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startSide: 0
   splinePath: {fileID: 1345266144}
-  stepLength: 1
-  stepInterval: 0.7
+  stepInterval: 0.4
   inputDirection: 1
 --- !u!4 &1345266146
 Transform:
@@ -575,7 +574,7 @@ Transform:
   m_GameObject: {fileID: 1345266143}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.16580129, y: 1.7256366, z: -1.1318055}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -690,6 +689,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2008436922}
+  - component: {fileID: 2008436923}
   m_Layer: 0
   m_Name: CubeSnakeHolder
   m_TagString: Untagged
@@ -713,6 +713,18 @@ Transform:
   - {fileID: 1345266146}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2008436923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008436921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99fd40b50242734caea2590daa658ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
