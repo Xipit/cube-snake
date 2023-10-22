@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 /// <summary>
 /// Data Class used to store the dimension of a cube.
@@ -23,11 +24,15 @@ public class Dimension3D
 
     public Dimension3D(int x, int y, int z)
     {
-        // ensure non-negative values
-        this.X = Mathf.Max(0, x);
-        this.Y = Mathf.Max(0, y);
-        this.Z = Mathf.Max(0, z);
+        // ensure all dimensions are above 3
+        this.X = Mathf.Max(3, x);
+        this.Y = Mathf.Max(3, y);
+        this.Z = Mathf.Max(3, z);
     }
+
+    public Dimension3D(float x, float y, float z) : this((int)x, (int)y, (int)z) { }
+
+    public Dimension3D(int xyz) : this(xyz, xyz, xyz) { }
 
     public static Dimension3D fromVector(Vector3 vector)
     {
@@ -46,7 +51,25 @@ public class Dimension3D
 
     public bool IsViableForCube()
     {
-        return X > 0 && Y > 0 && Z > 0;
+        return X >= 3 && Y >= 3 && Z >= 3;
+    }
+
+    public int GetRandomDimension()
+    {
+        int random = Random.Range(0, 3);
+
+        switch (random)
+        {
+            case 0:
+                return X;
+
+            case 1:
+                return Y;
+
+            case 2:
+            default:
+                return Z;
+        }
     }
 }
 
