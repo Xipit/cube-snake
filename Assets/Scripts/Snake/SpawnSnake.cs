@@ -9,7 +9,7 @@ public class SpawnSnake : MonoBehaviour
 {
     public static SpawnSnake Instance { get; private set; }
 
-    private CubePoint startPoint;
+    private List<CubePoint> startPoints;
     private DirectionOnCubeSide startDirection;
 
     public void SpawnSnakeOnCube(Cube cube, SplineContainer splinePath, CubeSideCoordinate startSide)
@@ -18,29 +18,58 @@ public class SpawnSnake : MonoBehaviour
         {
             return;
         }
+
+        startPoints = new List<CubePoint>();
         
         Vector3 positionInCube = startSide.GetPositionInCube(cube.Dimension, cube.Scale);
         Quaternion rotationInCube = startSide.GetRotationInCube();
 
-        CubeFieldCoordinate startFieldCoordinate = startSide.GetDimension2D(cube.Dimension).GetRandomFieldCoordinate();
-        Vector3 positionInSide = startFieldCoordinate.GetPositionInCubeSide(cube.Scale);
+        CubeFieldCoordinate startFieldCoordinate = GetStartFieldCoordinate(startSide.GetDimension2D(cube.Dimension).V);
 
-        Vector3 startPositionOfSnake = positionInCube + rotationInCube * positionInSide;
+        // First Knot
+        splinePath.Spline.Add(AddKnotToPath(startFieldCoordinate, rotationInCube, positionInCube, cube.Scale, true));
+        
+        for (int i = 0; i < 3; i++)
+        {
+            CubeFieldCoordinate fieldCoordinate =
+                new CubeFieldCoordinate(startFieldCoordinate.H + i, startFieldCoordinate.V);
+            
+            splinePath.Spline.Add(AddKnotToPath(fieldCoordinate, rotationInCube, positionInCube, cube.Scale));
+            
+            startPoints.Add(new CubePoint(startSide, fieldCoordinate));
+        }
+    }
 
+    public List<CubePoint> GetStartPoints()
+    {
+        return startPoints;
+    }
+
+    private static CubeFieldCoordinate GetStartFieldCoordinate(int maxV)
+    {
+        int centerV = (int)Math.Floor((float)maxV / 2);
+        return new CubeFieldCoordinate(0, centerV);
+    }
+
+    private static BezierKnot AddKnotToPath(CubeFieldCoordinate fieldCoordinate, Quaternion rotationInCube, Vector3 positionInCube, float scaleFactor, bool isFirstKnot = false)
+    {
+        Vector3 positionInSide = fieldCoordinate.GetPositionInCubeSide(scaleFactor);
+
+        Vector3 startPositionOfSnake = isFirstKnot switch
+        {
+            true => positionInCube + rotationInCube * (positionInSide - new Vector3(0.5f * scaleFactor, 0, 0)),
+            false => positionInCube + rotationInCube * (positionInSide + new Vector3(0.5f * scaleFactor, 0, 0))
+        };
+
+        Vector3 rotation = new Vector3(0, 90, 270);
+        
         BezierKnot startKnot = new BezierKnot();
         startKnot.Position = startPositionOfSnake;
-        startKnot.Rotation = rotationInCube;
+        startKnot.Rotation = Quaternion.Euler(rotation);
         startKnot.TangentIn = new float3(0, 0, -0.33f);
         startKnot.TangentOut = new float3(0, 0, 0.33f);
 
-        splinePath.Spline.Add(startKnot);
-        
-        startPoint = new CubePoint(startSide, startFieldCoordinate);
-    }
-
-    public CubePoint GetStartPoint()
-    {
-        return startPoint;
+        return startKnot;
     }
 
     private void Awake()
