@@ -44,7 +44,7 @@ public class CubeSnakeHolderManager : MonoBehaviour
         }
     }
 
-    public DirectionOnCubeSide TranslateInputDirectionToDirectionOnSide(MovementDirection stepDirection, DirectionOnCubeSide currentInputUpDirection)
+    public DirectionOnCubeSide TranslateStepDirectionToLocalDirectionOnSide(MovementDirection stepDirection, DirectionOnCubeSide currentInputUpDirection)
     {
         return stepDirection switch
         {

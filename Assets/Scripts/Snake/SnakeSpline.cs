@@ -106,7 +106,7 @@ namespace Snake
             Vector3 positionInSide = nextPoint.FieldCoordinate.GetPositionInCubeSide(cube.Scale);
 
             DirectionOnCubeSide directionOnCubeSide =
-                CubeSnakeHolderManager.Instance.TranslateInputDirectionToDirectionOnSide(stepDirection,
+                CubeSnakeHolderManager.Instance.TranslateStepDirectionToLocalDirectionOnSide(stepDirection,
                     currentInputUpDirection);
             
             // set position to the edge of a field
@@ -126,9 +126,54 @@ namespace Snake
         {
             Quaternion sideRotation = nextPoint.SideCoordinate.GetRotationInCube();
 
-            /// TODO get rotation in stepDirection
+            Debug.Log("sideRotation: " + sideRotation.eulerAngles );
+
+            Vector3 rotation = Vector3.zero;
+            DirectionOnCubeSide stepDirectionAsDirectionOnCubeSide = CubeSnakeHolderManager.Instance.TranslateStepDirectionToLocalDirectionOnSide(stepDirection, currentInputUpDirection);
             
-            return sideRotation;
+
+            switch (nextPoint.SideCoordinate)
+            {
+                case CubeSideCoordinate.Front:
+                case CubeSideCoordinate.Right:
+                case CubeSideCoordinate.Back:
+                case CubeSideCoordinate.Left:
+                    rotation = stepDirectionAsDirectionOnCubeSide switch
+                    {
+                        DirectionOnCubeSide.negHor => new Vector3(-90, 90, 270),
+                        DirectionOnCubeSide.posHor => new Vector3(90, 90, 90),
+                        DirectionOnCubeSide.negVert => new Vector3(-180, 0, 0),
+                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 0),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    break;
+                case CubeSideCoordinate.Up:
+                    rotation = stepDirectionAsDirectionOnCubeSide switch
+                    {
+                        DirectionOnCubeSide.negHor => new Vector3(0, -90, 0),
+                        DirectionOnCubeSide.posHor => new Vector3(0, 90, 0),
+                        DirectionOnCubeSide.negVert => new Vector3(-180, 0, 0),
+                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 0),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    break;
+                case CubeSideCoordinate.Down:
+                    rotation = stepDirectionAsDirectionOnCubeSide switch
+                    {
+                        DirectionOnCubeSide.negHor => new Vector3(0, 90, 0),
+                        DirectionOnCubeSide.posHor => new Vector3(0, -90, 0),
+                        DirectionOnCubeSide.negVert => new Vector3(-180, 0, 0),
+                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 0),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            var newRotation = sideRotation.eulerAngles + rotation;
+
+            return Quaternion.Euler(newRotation);
         }
 
         private CubePoint GetNextPointOnCube()
@@ -136,7 +181,7 @@ namespace Snake
             CubePoint currentPoint = pointsOfSnake.Last();
             CubePoint nextPoint;
 
-            DirectionOnCubeSide inputDirectionOnCubeSide = CubeSnakeHolderManager.Instance.TranslateInputDirectionToDirectionOnSide(stepDirection, currentInputUpDirection);
+            DirectionOnCubeSide inputDirectionOnCubeSide = CubeSnakeHolderManager.Instance.TranslateStepDirectionToLocalDirectionOnSide(stepDirection, currentInputUpDirection);
 
             nextPoint = inputDirectionOnCubeSide switch
             {
