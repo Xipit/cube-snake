@@ -16,6 +16,9 @@ public class CubeSpawner : MonoBehaviour
     [Range(0, 100)]
     public int DecorationPercentage = 0;
 
+    [Header("Snack")]
+    public GameObject[] snackPrefabs;
+
     private Dimension3D Dimension;
 
     public static CubeSpawner Instance { get; private set; }
@@ -37,6 +40,10 @@ public class CubeSpawner : MonoBehaviour
         
         director.AssignCubeAndPrefabs(cube, FieldPrefabs, TunnelPrefab, DecorationPrefabs, DecorationPercentage);
         director.InstantiateCubeContent();
+
+        // TODO add snack reference to snake -> so snake can "eat" snacks
+        // TODO pass position of snakes Points, so snack wont spawn inside snake
+        Snack snack = new Snack(snackPrefabs, cube, new CubePoint[] { });
     }
 
     private void DetermineValuesFromGameMode(GameMode mode)
@@ -106,6 +113,12 @@ public class CubeSpawner : MonoBehaviour
         if (!dimension.IsViableForCube())
         {
             Debug.LogError("Specified DimensionAsVector is not suitable to create a Cube. All dimensions need to be > 3.");
+            return false;
+        }
+
+        if(snackPrefabs.Length < 1)
+        {
+            Debug.LogError("No snack prefab specified. Assign at least 1 snack prefab!");
             return false;
         }
 

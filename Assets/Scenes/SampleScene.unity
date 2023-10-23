@@ -440,8 +440,9 @@ MonoBehaviour:
   - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
   - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
   - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
-  DimensionAsVector: {x: 5, y: 5, z: 5}
   DecorationPercentage: 50
+  snackPrefabs:
+  - {fileID: 4758810827062625503, guid: 1bbed832fd7e64977a83ec9c3b4cadbc, type: 3}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -911,14 +912,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1653301749
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1653301751}
+  - component: {fileID: 1653301750}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1653301750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1653301749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c90936e2ff6b4f808f32e7dbca26e3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Mode: {fileID: 11400000, guid: 23287b92b6ff54ebd94fcca647c1b4b4, type: 2}
+--- !u!4 &1653301751
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1653301749}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.000027656555, y: -0.0000019073486, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 330585546}
-  - {fileID: 410087041}
-  - {fileID: 832575519}
+  - {fileID: 1653301751}
   - {fileID: 663610168}
   - {fileID: 1535876280}
   - {fileID: 1577610163}
   - {fileID: 1345266146}
+  - {fileID: 330585546}
+  - {fileID: 410087041}
+  - {fileID: 832575519}

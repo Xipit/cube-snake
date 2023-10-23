@@ -25,6 +25,7 @@ public class Cube
         Sides = CreateSides(dimension, Tunnels);
     }
 
+    // Note for the future:
     // when implementing generating multiple tunnels, you need to make sure that tunnels dont interfere with each other
     // i.e. have the same point
     private Tunnel[] CreateTunnels(Dimension3D dimension)
@@ -71,11 +72,41 @@ public class Cube
         }
     }
 
+    /// <summary>
+    /// Generate a random point on the cube.
+    /// </summary>
     public CubePoint GetRandomPoint(Dimension3D dimension)
     {
         CubeSideCoordinate randomSideCoordinate = (CubeSideCoordinate)Random.Range(0, 6);
         Dimension2D dimensionOfSide = randomSideCoordinate.GetDimension2D(dimension);
 
         return new CubePoint(randomSideCoordinate, dimensionOfSide.GetRandomFieldCoordinate());
+    }
+
+    /// <summary>
+    /// Generate a random point on the cube, but avoiding certain points.
+    /// </summary>
+    /// <param name="pointsToAvoid">Array of CubePoints, which are not allowed to be generated.</param>
+    public CubePoint GetRandomPoint(Dimension3D dimension, CubePoint[] pointsToAvoid)
+    {
+        bool shouldGenerateNewPoint = true;
+        CubePoint randomPoint;
+
+        do
+        {
+            shouldGenerateNewPoint = false;
+            randomPoint = GetRandomPoint(dimension);
+
+            foreach (CubePoint pointToAvoid in pointsToAvoid)
+            {
+                if (randomPoint.IsEqual(pointToAvoid))
+                {
+                    shouldGenerateNewPoint = true;
+                }
+            }
+
+        } while (shouldGenerateNewPoint);
+
+        return randomPoint;
     }
 }
