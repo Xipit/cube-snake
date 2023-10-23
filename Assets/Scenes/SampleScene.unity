@@ -553,7 +553,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startSide: 0
   splinePath: {fileID: 1345266144}
-  stepInterval: 4
+  stepInterval: 0.4
   inputDirection: 1
 --- !u!4 &1345266146
 Transform:
