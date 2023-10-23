@@ -439,7 +439,7 @@ MonoBehaviour:
   TunnelPrefab: {fileID: 2268215711632602545, guid: df3390a3e960241f99d50343c69772c4,
     type: 3}
   CubeSnakeHolder: {fileID: 2008436921}
-  DimensionAsVector: {x: 3, y: 4, z: 5}
+  DimensionAsVector: {x: 6, y: 4, z: 5}
   snakeSpline: {fileID: 1345266145}
 --- !u!1 &832575517
 GameObject:
@@ -565,7 +565,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startSide: 0
   splinePath: {fileID: 1345266144}
-  stepInterval: 0.4
+  stepInterval: 4
   inputDirection: 1
 --- !u!4 &1345266146
 Transform:

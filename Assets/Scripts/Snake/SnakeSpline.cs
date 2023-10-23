@@ -35,15 +35,12 @@ namespace Snake
             this.cube = cube;
 
             SpawnSnake.Instance.SpawnSnakeOnCube(cube, splinePath, startSide);
-            pointsOfSnake = new List<CubePoint>
-            {
-                SpawnSnake.Instance.GetStartPoint()
-            };
-            
-            UpdateStepDirection(inputDirection);
+            pointsOfSnake = SpawnSnake.Instance.GetStartPoints();
+
+            stepDirection = inputDirection;
             // it is posVert because the startSide is the front side
             currentInputUpDirection = DirectionOnCubeSide.posVert;
-            
+
             InvokeRepeating(nameof(DetermineNextStepDirection), stepInterval * 0.75f, stepInterval);
             InvokeRepeating(nameof(UpdateSpline), stepInterval, stepInterval);
         }
@@ -58,26 +55,18 @@ namespace Snake
         /// </summary>
         private void DetermineNextStepDirection()
         {
-            // TODO move the knot to the right point
-            CubePoint lastPoint = pointsOfSnake.Last();
-            
-            BezierKnot lastKnot = splinePath.Spline.ToArray().Last();
-
-            if (stepDirection != inputDirection)
+            if (stepDirection == inputDirection)
             {
-                lastKnot.Position = GetNextPositionVector(lastPoint);
-                lastKnot.Rotation = GetNextRotation(lastPoint);
+                return;
             }
-        
-            splinePath.Spline.SetKnot(splinePath.Spline.Count - 1, lastKnot);
-            UpdateStepDirection(inputDirection);
+            
+            stepDirection = inputDirection;
+            
+            CubePoint lastPoint = pointsOfSnake.Last();
+
+            splinePath.Spline.SetKnot(splinePath.Spline.Count - 1, GetBezierKnot(lastPoint));
         }
 
-        private void UpdateStepDirection(MovementDirection direction)
-        {
-            stepDirection = direction;
-        }
-    
         /// <summary>
         /// Delete tail of splineArray and spawn new head, according to stepDirection
         /// </summary>
@@ -86,21 +75,26 @@ namespace Snake
             // add a new knot to the spline
             // head == end of splineArray
             // tail == start of splineArray
-            
-            BezierKnot newKnot = new BezierKnot();
-            
+
             CubePoint nextPoint = GetNextPointOnCube();
-            
-            newKnot.Position = GetNextPositionVector(nextPoint);
-            newKnot.Rotation = GetNextRotation(nextPoint);
-            newKnot.TangentIn = new float3(0, 0, -0.33f);
-            newKnot.TangentOut = new float3(0, 0, 0.33f);
  
-            splinePath.Spline.Add(newKnot);
+            splinePath.Spline.Add(GetBezierKnot(nextPoint));
             splinePath.Spline.RemoveAt(0);
             
             pointsOfSnake.Add(nextPoint);
             pointsOfSnake.RemoveAt(0);
+        }
+
+        private BezierKnot GetBezierKnot(CubePoint cubePoint)
+        {
+            BezierKnot bezierKnot = new BezierKnot();
+
+            bezierKnot.Position = GetNextPositionVector(cubePoint);
+            bezierKnot.Rotation = GetNextRotation(cubePoint);
+            bezierKnot.TangentIn = new float3(0, 0, -0.33f);
+            bezierKnot.TangentOut = new float3(0, 0, 0.33f);
+
+            return bezierKnot;
         }
 
         private Vector3 GetNextPositionVector(CubePoint nextPoint)
@@ -111,16 +105,20 @@ namespace Snake
             // position in the center of a field
             Vector3 positionInSide = nextPoint.FieldCoordinate.GetPositionInCubeSide(cube.Scale);
 
+            DirectionOnCubeSide directionOnCubeSide =
+                CubeSnakeHolderManager.Instance.TranslateInputDirectionToDirectionOnSide(stepDirection,
+                    currentInputUpDirection);
+            
             // set position to the edge of a field
-            positionInSide += stepDirection switch
+            positionInSide += directionOnCubeSide switch
             {
-                MovementDirection.Up => new Vector3(0, 0, -0.5f),
-                MovementDirection.Right => new Vector3(-0.5f, 0, 0),
-                MovementDirection.Down => new Vector3(0, 0, 0.5f),
-                MovementDirection.Left => new Vector3(0.5f, 0, 0),
+                DirectionOnCubeSide.negHor => new Vector3(-0.5f * cube.Scale, 0, 0),
+                DirectionOnCubeSide.posHor => new Vector3(0.5f * cube.Scale, 0, 0),
+                DirectionOnCubeSide.negVert => new Vector3(0, 0, -0.5f * cube.Scale),
+                DirectionOnCubeSide.posVert => new Vector3(0, 0, 0.5f * cube.Scale),
                 _ => new Vector3(0, 0, 0)
             };
-            
+
             return positionInCube + rotationInCube * positionInSide;
         }
 
@@ -138,8 +136,7 @@ namespace Snake
             CubePoint currentPoint = pointsOfSnake.Last();
             CubePoint nextPoint;
 
-            DirectionOnCubeSide inputDirectionOnCubeSide =
-                CubeSnakeHolderManager.Instance.TranslateInputDirectionToDirectionOnSide(stepDirection, currentInputUpDirection);
+            DirectionOnCubeSide inputDirectionOnCubeSide = CubeSnakeHolderManager.Instance.TranslateInputDirectionToDirectionOnSide(stepDirection, currentInputUpDirection);
 
             nextPoint = inputDirectionOnCubeSide switch
             {
