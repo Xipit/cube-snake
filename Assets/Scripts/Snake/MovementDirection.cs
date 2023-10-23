@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Snake
@@ -13,41 +14,6 @@ namespace Snake
 
     static class MovementDirectionMethods
     {
-        public static Vector3 GetDirectionVector(this MovementDirection direction, float stepLength)
-        {
-            return direction switch
-            {
-                MovementDirection.Left => new Vector3(-stepLength, 0, 0),
-                MovementDirection.Right => new Vector3(stepLength, 0, 0),
-                MovementDirection.Down => new Vector3(0, 0, -stepLength),
-                MovementDirection.Up => new Vector3(0, 0, stepLength),
-                _ => new Vector3(0, 0, 0)
-            };
-        }
-
-        public static Quaternion GetRotation(this MovementDirection direction)
-        {
-            /// getField of current knot
-            /// if (nextField is on same side) {
-            ///     use cubeSide.Rotation
-            ///     return cubeSide.Rotation + MovementDirection.Rotation
-            /// }
-            /// else
-            /// {
-            ///     getNewFieldOnNewSide
-            ///     use this rotation
-            /// } 
-            
-            return direction switch
-            {
-                MovementDirection.Left => Quaternion.Euler(0,270,0),
-                MovementDirection.Right => Quaternion.Euler(0,90,0),
-                MovementDirection.Down => Quaternion.Euler(0,180,0),
-                MovementDirection.Up => Quaternion.Euler(0,0,0),
-                _ => Quaternion.Euler(0,0,0)
-            };
-        }
-
         public static MovementDirection GetOppositeDirection(this MovementDirection direction)
         {
             return direction switch
@@ -56,7 +22,79 @@ namespace Snake
                 MovementDirection.Right => MovementDirection.Left,
                 MovementDirection.Down => MovementDirection.Up,
                 MovementDirection.Up => MovementDirection.Down,
-                _ => MovementDirection.Up // TODO Error Logging
+                _ => direction
+            };
+        }
+
+        /// <summary>
+        /// Translates the stepDirection to the local coordinate system of a cubeSide.
+        /// </summary>
+        public static DirectionOnCubeSide ToLocalDirectionOnCubeSide(this MovementDirection stepDirection,
+            DirectionOnCubeSide currentInputUpDirection)
+        {
+            return stepDirection switch
+            {
+                MovementDirection.Up => currentInputUpDirection,
+                MovementDirection.Right => currentInputUpDirection switch
+                {
+                    DirectionOnCubeSide.negHor => DirectionOnCubeSide.posVert,
+                    DirectionOnCubeSide.posHor => DirectionOnCubeSide.negVert,
+                    DirectionOnCubeSide.negVert => DirectionOnCubeSide.negHor,
+                    DirectionOnCubeSide.posVert => DirectionOnCubeSide.posHor,
+                    _ => throw new ArgumentOutOfRangeException(nameof(currentInputUpDirection), currentInputUpDirection,
+                        null)
+                },
+                MovementDirection.Down => currentInputUpDirection switch
+                {
+                    DirectionOnCubeSide.negHor => DirectionOnCubeSide.posHor,
+                    DirectionOnCubeSide.posHor => DirectionOnCubeSide.negHor,
+                    DirectionOnCubeSide.negVert => DirectionOnCubeSide.posVert,
+                    DirectionOnCubeSide.posVert => DirectionOnCubeSide.negVert,
+                    _ => throw new ArgumentOutOfRangeException(nameof(currentInputUpDirection), currentInputUpDirection,
+                        null)
+                },
+                MovementDirection.Left => currentInputUpDirection switch
+                {
+                    DirectionOnCubeSide.negHor => DirectionOnCubeSide.negVert,
+                    DirectionOnCubeSide.posHor => DirectionOnCubeSide.posVert,
+                    DirectionOnCubeSide.negVert => DirectionOnCubeSide.posHor,
+                    DirectionOnCubeSide.posVert => DirectionOnCubeSide.negHor,
+                    _ => throw new ArgumentOutOfRangeException(nameof(currentInputUpDirection), currentInputUpDirection,
+                        null)
+                },
+                _ => throw new ArgumentOutOfRangeException(nameof(stepDirection), stepDirection, null)
+            };
+        }
+
+        /// <summary>
+        /// On each side the local coordinates have a different rotation. This Method returns the DirectionOnCubeSide where snake should go by pressing Input.Up.
+        /// </summary>
+        /// <param name="stepDirection">Direction of the movement of the snake relativ to the users view.</param>
+        /// <param name="nextSideDirection">DirectionOnCubeSide of the side where the snake will go</param>
+        public static DirectionOnCubeSide GetInputUpAsDirectionOnCubeSide(this MovementDirection stepDirection,
+            DirectionOnCubeSide nextSideDirection)
+        {
+            return stepDirection switch
+            {
+                MovementDirection.Up => nextSideDirection,
+                MovementDirection.Down => nextSideDirection.InvertDirection(),
+                MovementDirection.Right => nextSideDirection switch
+                {
+                    DirectionOnCubeSide.negHor => DirectionOnCubeSide.negVert,
+                    DirectionOnCubeSide.posHor => DirectionOnCubeSide.posVert,
+                    DirectionOnCubeSide.negVert => DirectionOnCubeSide.posHor,
+                    DirectionOnCubeSide.posVert => DirectionOnCubeSide.negHor,
+                    _ => throw new ArgumentOutOfRangeException(nameof(nextSideDirection), nextSideDirection, null)
+                },
+                MovementDirection.Left => nextSideDirection switch
+                {
+                    DirectionOnCubeSide.negHor => DirectionOnCubeSide.posVert,
+                    DirectionOnCubeSide.posHor => DirectionOnCubeSide.negVert,
+                    DirectionOnCubeSide.negVert => DirectionOnCubeSide.negHor,
+                    DirectionOnCubeSide.posVert => DirectionOnCubeSide.posHor,
+                    _ => throw new ArgumentOutOfRangeException(nameof(nextSideDirection), nextSideDirection, null)
+                },
+                _ => throw new ArgumentOutOfRangeException(nameof(stepDirection), stepDirection, null)
             };
         }
     }
