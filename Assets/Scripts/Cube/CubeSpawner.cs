@@ -1,70 +1,152 @@
 using System.Collections;
 using System.Collections.Generic;
-using Snake;
-using Snake;
 using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
 {
     public GameObject CubePreset;
-    public GameObject FieldPrefab;
+    [Header("Field Prefabs")]
+    [Tooltip("0: Front, 1: Back, 2: Right, 3: Left, 4: Up, 5: Right")]
+    public GameObject[] FieldPrefabs = new GameObject[6];
     public GameObject TunnelPrefab;
+    [Tooltip("0: Front, 1: Back, 2: Right, 3: Left, 4: Up, 5: Right")]
+    public GameObject[] DecorationPrefabs = new GameObject[6];
 
-    public GameObject CubeSnakeHolder;
+    [Header("Options")]
+    [Range(0, 100)]
+    public int DecorationPercentage = 0;
 
-    public Vector3 DimensionAsVector; // only for editing in Unity Editor
-    public Dimension3D Dimension;
-
-    private CubeDirector director;
+    [Header("Snack")]
+    public GameObject[] snackPrefabs;
 
     public Snake.Snake snake;
 
-    // Start is called before the first frame update
-    void Start()
+    private Dimension3D Dimension;
+
+    public static CubeSpawner Instance { get; private set; }
+
+    public void SpawnCube(GameMode mode)
     {
-        if(!CubePreset || !FieldPrefab || !TunnelPrefab)
+        DetermineValuesFromGameMode(mode);
+
+        if (!IsReadyForSpawn(Dimension))
         {
-            Debug.LogError("Prefabs have not been set on Cubespawner, cant spawn cube!");
             return;
         }
 
-        if (this.CubePreset.TryGetComponent<CubeDirector>(out CubeDirector director)
-            && (director == null || (director != null && !director.enabled)))
-        {
-            Debug.LogError("CubePreset Prefab does not have necessary CubeDirector Script attached or enabled!");
-            return;
-        }
+        Cube cube = new Cube(Dimension);
 
-        Dimension = Dimension3D.fromVector(DimensionAsVector);
+        GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObject(new Vector3(0, 0, 0), Quaternion.identity, CubePreset);
+        cubeGameObject.transform.parent = RotationReferenceManager.Instance.transform;
 
-        if(!Dimension.IsViableForCube())
-        {
-            Debug.LogWarning("Specified DimensionAsVector is not suitable to create a Cube. All dimensions need to be > 0.");
-        }
+        CubeDirector director = cubeGameObject.GetComponent<CubeDirector>();
+        
+        director.AssignCubeAndPrefabs(cube, FieldPrefabs, TunnelPrefab, DecorationPrefabs, DecorationPercentage);
+        director.InstantiateCubeContent();
 
-        Cube cube = SpawnCube(Dimension, FieldPrefab, TunnelPrefab);
+        // TODO add snack reference to snake -> so snake can "eat" snacks
+        // TODO pass position of snakes Points, so snack wont spawn inside snake
+        Snack snack = new Snack(snackPrefabs, cube, new CubePoint[] { });
 
-        if (!snake)
-        {
-            Debug.LogError("Snake reference has not been set. Cant start snake!");
+        if(!snake){
+            Debug.LogError("SNake reference has not been set. Cant start snake");
             return;
         }
 
         snake.StartSnake(cube, CubeSideCoordinate.Front);
     }
 
-
-    Cube SpawnCube(Dimension3D dimension, GameObject fieldPrefab, GameObject tunnelPrefab)
+    private void DetermineValuesFromGameMode(GameMode mode)
     {
-        Cube cube = new Cube(dimension);
+        if (mode.dimensionsAreRandom)
+        {
+            Dimension3D randomDimension = new Dimension3D(
+                Random.Range(3, mode.dimension.x),
+                Random.Range(3, mode.dimension.y),
+                Random.Range(3, mode.dimension.z));
 
-        GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObjectAsChild(new Vector3(0,0,0), Quaternion.identity, CubePreset, CubeSnakeHolder.transform);
+            Dimension = randomDimension;
+        }else
+        {
+            Dimension = Dimension3D.fromVector(mode.dimension);
+        }
 
-        director = cubeGameObject.GetComponent<CubeDirector>();
-        director = cubeGameObject.GetComponent<CubeDirector>();
-        director.AssignCubeAndPrefabs(cube, fieldPrefab, tunnelPrefab); 
-        director.InstantiateCubeContent();
+        if (mode.cubeIsSquare)
+        {
+            Dimension = new Dimension3D(Dimension.GetRandomDimension());
+        }
 
-        return cube;
+
+        if (!mode.sidesAreUnique)
+        {
+            CubeSideCoordinate oneSideToRuleThemAll = (CubeSideCoordinate)Random.Range(0, 6);
+
+            for (int i = 0; i < 6; i++)
+            {
+                FieldPrefabs[i] = FieldPrefabs[(int)oneSideToRuleThemAll];
+                DecorationPrefabs[i] = DecorationPrefabs[(int)oneSideToRuleThemAll];
+            }
+        }
+
+    }
+
+    private bool IsReadyForSpawn(Dimension3D dimension)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (FieldPrefabs[i] == null)
+            {
+                Debug.LogError("FieldPrefabs have not been filled on CubeSpawner, cant spawn cube!");
+                return false;
+            }
+            if (DecorationPrefabs[i] == null)
+            {
+                Debug.LogError("DecorationPrefabs have not been filled on CubeSpawner, cant spawn cube!");
+                return false;
+            }
+        }
+
+
+        if (!CubePreset || FieldPrefabs.Length != 6 || DecorationPrefabs.Length != 6 || !TunnelPrefab)
+        {
+            Debug.LogError("Prefabs have not been set on Cubespawner or Prefab Arrays arent sized to 6, cant spawn cube!");
+            return false;
+        }
+
+        if (this.CubePreset.TryGetComponent<CubeDirector>(out CubeDirector director)
+            && (director == null || (director != null && !director.enabled)))
+        {
+            Debug.LogError("CubePreset Prefab does not have necessary CubeDirector Script attached or enabled!");
+            return false;
+        }
+
+        if (!dimension.IsViableForCube())
+        {
+            Debug.LogError("Specified DimensionAsVector is not suitable to create a Cube. All dimensions need to be > 3.");
+            return false;
+        }
+
+        if(snackPrefabs.Length < 1)
+        {
+            Debug.LogError("No snack prefab specified. Assign at least 1 snack prefab!");
+            return false;
+        }
+
+        return true;
+    }
+
+
+    private void Awake()
+    {
+        // If there is an instance, and it's not me, delete myself.
+
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
     }
 }
