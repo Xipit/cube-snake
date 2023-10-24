@@ -14,8 +14,9 @@ public class CubeSpawner : MonoBehaviour
     public Vector3 DimensionAsVector; // only for editing in Unity Editor
     public Dimension3D Dimension;
 
-    public SnakeSpline snakeSpline;
     private CubeDirector director;
+
+    public Snake.Snake snake;
 
     // Start is called before the first frame update
     void Start()
@@ -40,12 +41,19 @@ public class CubeSpawner : MonoBehaviour
             Debug.LogWarning("Specified DimensionAsVector is not suitable to create a Cube. All dimensions need to be > 0.");
         }
 
-        SpawnCube(Dimension, FieldPrefab, TunnelPrefab); 
-        snakeSpline.InitializeDataForSnake(this.director.Cube);
+        Cube cube = SpawnCube(Dimension, FieldPrefab, TunnelPrefab);
+
+        if (!snake)
+        {
+            Debug.LogError("Snake reference has not been set. Cant start snake!");
+            return;
+        }
+
+        snake.StartSnake(cube, CubeSideCoordinate.Front);
     }
 
 
-    GameObject SpawnCube(Dimension3D dimension, GameObject fieldPrefab, GameObject tunnelPrefab)
+    Cube SpawnCube(Dimension3D dimension, GameObject fieldPrefab, GameObject tunnelPrefab)
     {
         Cube cube = new Cube(dimension);
 
@@ -55,6 +63,6 @@ public class CubeSpawner : MonoBehaviour
         director.AssignCubeAndPrefabs(cube, fieldPrefab, tunnelPrefab); 
         director.InstantiateCubeContent();
 
-        return cubeGameObject;
+        return cube;
     }
 }

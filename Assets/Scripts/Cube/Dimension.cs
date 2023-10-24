@@ -77,4 +77,32 @@ public class Dimension2D
     {
         return new CubeFieldCoordinate(Random.Range(0, H), Random.Range(0, V));
     }
+
+    public bool IsPointInDirectionInDimension(CubePoint point, DirectionOnCubeSide direction)
+    {
+        Vector2 vectorToNextPoint = direction.ToVector2();
+
+        int maxH = this.H;
+        int maxV = this.V;
+
+        int H = point.FieldCoordinate.H;
+        int V = point.FieldCoordinate.V;
+
+        if (H + vectorToNextPoint.x < maxH &&
+            H + vectorToNextPoint.x >= 0 &&
+            V + vectorToNextPoint.y < maxV &&
+            V + vectorToNextPoint.y >= 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public CubeFieldCoordinate GetFieldInLeftCenter()
+    {
+        int centerV = (int)Mathf.Floor((float)this.V / 2);
+
+        return new CubeFieldCoordinate(0, centerV);
+    }
 }
