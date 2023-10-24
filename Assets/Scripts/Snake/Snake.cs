@@ -23,12 +23,20 @@ namespace Snake
 
         private DirectionOnCubeSide ReferenceDirectionForInput;
 
+        [Header("Snake Bodyparts")]
+        public GameObject SnakeHeadPrefab;
+        public GameObject SnakeBodyPrefab;
+        public GameObject SnakeTailPrefab;
+        public GameObject EmptyPrefab;
+        private List<GameObject> BodyParts = new List<GameObject>();
+
         public void StartSnake(Cube cube, CubeSideCoordinate startSide)
         {
             this.Cube = cube;
             this.SplinePath = transform.GetComponent<SplineContainer>();
             this.Points = CreateStartPoints(cube, startSide);
 
+            BuildSnakeBody();
 
             if (!this.SplinePath)
             {
@@ -135,6 +143,8 @@ namespace Snake
             
             Points.Add(nextPoint);
             Points.RemoveAt(0);
+
+            UpdateSnakeBody();
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -250,8 +260,52 @@ namespace Snake
             }
         }
 
-       
+        private void UpdateSnakeBody()
+        {
+            // set each bodypart to a specific percantage of the spline when updating the spline
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                BodyParts[i].GetComponent<SplineAnimate>().NormalizedTime = i * (1.0f / BodyParts.Count);
+                BodyParts[i].GetComponent<SplineAnimate>().Play();
+            }
+        }
 
-       
+        /// <summary>
+        /// Fill the List of BodyParts (instantiated GameObjects) with each part of the snake
+        /// </summary>
+        private void BuildSnakeBody()
+        {
+            // Tail
+            BodyParts.Add(Instantiate(SnakeTailPrefab));
+            ConfigureBodyAnimator(0);
+
+            // Body (iterate doubled index for more density in the body)
+            for (int i = 1; i < (SplinePath.Spline.GetLength() * 2) - 3; i++) 
+            {
+                BodyParts.Add(Instantiate(SnakeBodyPrefab));
+                ConfigureBodyAnimator(i);
+                Debug.Log(i + " Body");
+            }
+
+            // Head
+            BodyParts.Add(Instantiate(SnakeHeadPrefab));
+            ConfigureBodyAnimator((int)(SplinePath.Spline.GetLength() * 2) - 3);
+
+            // Empty
+            BodyParts.Add(Instantiate(EmptyPrefab));
+            ConfigureBodyAnimator((int)(SplinePath.Spline.GetLength() * 2) - 2);
+        }
+
+        /// <summary>
+        /// Ensure to set initial options like container and speed for the animator of each bodypart
+        /// </summary>
+        private void ConfigureBodyAnimator(int index)
+        {
+            SplineAnimate animate = BodyParts[index].GetComponent<SplineAnimate>();
+            animate.Container = SplinePath;
+            animate.Loop = SplineAnimate.LoopMode.Once;
+            animate.AnimationMethod = SplineAnimate.Method.Speed;
+            animate.MaxSpeed = Cube.Scale / StepInterval;
+        }
     }
 }
