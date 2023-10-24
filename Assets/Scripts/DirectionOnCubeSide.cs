@@ -40,4 +40,16 @@ static class DirectionOnCubeSideMethods
             _ => direction
         };
     }
+
+    public static Vector2 ToVector2(this DirectionOnCubeSide direction)
+    {
+        return (direction switch
+        {
+            DirectionOnCubeSide.negHor => new Vector2(-1, 0),
+            DirectionOnCubeSide.posHor => new Vector2(1, 0),
+            DirectionOnCubeSide.negVert => new Vector2(0, -1),
+            DirectionOnCubeSide.posVert => new Vector2(0, 1),
+            _ => Vector2.zero
+        });
+    }
 }

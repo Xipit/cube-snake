@@ -7,25 +7,25 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
 
-    public MovementDirection? GetPlayerInput(MovementDirection stepDirection)
+    public InputDirection? GetPlayerInput(InputDirection stepDirection)
     {
-        MovementDirection? direction = null;
+        InputDirection? direction = null;
 
         if (Input.GetAxis("Horizontal") < 0)
         {
-            direction =  MovementDirection.Left;
+            direction =  InputDirection.Left;
         }
         if (Input.GetAxis("Horizontal") > 0)
         {
-            direction =  MovementDirection.Right;
+            direction =  InputDirection.Right;
         }
         if (Input.GetAxis("Vertical") < 0)
         {
-            direction = MovementDirection.Down;
+            direction = InputDirection.Down;
         }
         if (Input.GetAxis("Vertical") > 0)
         {
-            direction = MovementDirection.Up;
+            direction = InputDirection.Up;
         }
         
         

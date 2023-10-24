@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Snake;
 using UnityEngine;
 
-public class CubeSnakeHolderManager : MonoBehaviour
+public class RotationReferenceManager : MonoBehaviour
 {
-    public static CubeSnakeHolderManager Instance { get; private set; }
+    public static RotationReferenceManager Instance { get; private set; }
 
     private void Awake()
     {
@@ -22,20 +22,20 @@ public class CubeSnakeHolderManager : MonoBehaviour
         }
     }
 
-    public void RotateCubeSnakeHolder(MovementDirection stepDirection)
+    public void Rotate(InputDirection stepDirection)
     {
         switch (stepDirection)
         {
-            case MovementDirection.Up:
+            case InputDirection.Up:
                 transform.Rotate(Vector3.right, -90, Space.World);
                 break;
-            case MovementDirection.Right:
+            case InputDirection.Right:
                 transform.Rotate(Vector3.up, 90, Space.World); 
                 break;
-            case MovementDirection.Down:
+            case InputDirection.Down:
                 transform.Rotate(Vector3.right, 90, Space.World);
                 break;
-            case MovementDirection.Left:
+            case InputDirection.Left:
                 transform.Rotate(Vector3.up, -90, Space.World);
                 break;
             default:
