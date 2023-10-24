@@ -36,6 +36,9 @@ namespace Snake
             bodyParts = new List<GameObject>();
 
             BuildSnakeBody();
+            UpdateSnakeBody();
+
+            Time.timeScale = 0.5F;
         }
     
         private void Update()
@@ -83,6 +86,10 @@ namespace Snake
             splinePath.Spline.Add(newKnot);
             splinePath.Spline.RemoveAt(0);
 
+            UpdateSnakeBody();
+        }
+
+        private void UpdateSnakeBody(){
             // set each bodypart to a specific percantage of the spline when updating the spline
             for (int i = 0; i<bodyParts.Count; i++)
             {
@@ -98,31 +105,31 @@ namespace Snake
         {
             // Tail
             bodyParts.Add(Instantiate(snakeTail));
-            ConfigureBodyAnimator(bodyParts[0]);
+            ConfigureBodyAnimator(0);
 
             // Body (iterate doubled index for more density in the body)
             for (int i = 1; i<(splinePath.Spline.GetLength()*2)-3; i++) 
             {
                 bodyParts.Add(Instantiate(snakeBody));
-                ConfigureBodyAnimator(bodyParts[i]);
+                ConfigureBodyAnimator(i);
                 Debug.Log(i + " Body");
             }
 
             // Head
             bodyParts.Add(Instantiate(snakeHead));
-            ConfigureBodyAnimator(bodyParts[(int) (splinePath.Spline.GetLength()*2)-3]);
+            ConfigureBodyAnimator((int) (splinePath.Spline.GetLength() * 2) - 3);
 
             // Empty
             bodyParts.Add(Instantiate(emptyObject));
-            ConfigureBodyAnimator(bodyParts[(int) (splinePath.Spline.GetLength()*2)-2]);
+            ConfigureBodyAnimator((int) (splinePath.Spline.GetLength() * 2) - 2);
         }
 
         /// <summary>
         /// Ensure to set initial options like container and speed for the animator of each bodypart
         /// </summary>
-        private void ConfigureBodyAnimator(GameObject bodyPart)
+        private void ConfigureBodyAnimator(int index)
         {
-            SplineAnimate animate = bodyPart.GetComponent<SplineAnimate>();
+            SplineAnimate animate = bodyParts[index].GetComponent<SplineAnimate>();
             animate.Container = splinePath;
             animate.Loop = SplineAnimate.LoopMode.Once;
             animate.AnimationMethod = SplineAnimate.Method.Speed;
