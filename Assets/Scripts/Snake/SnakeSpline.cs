@@ -23,7 +23,6 @@ namespace Snake
         public GameObject snakeBody;
         public GameObject snakeTail;
         public GameObject emptyObject;
-        private List<SplineAnimate> bodyAnimators;
         private List<GameObject> bodyParts;
 
         private void Start()
@@ -34,10 +33,9 @@ namespace Snake
             InvokeRepeating(nameof(UpdateSpline), stepInterval, stepInterval);
 
             // List Initializations
-            bodyAnimators = new List<SplineAnimate>();
             bodyParts = new List<GameObject>();
 
-            BuildSnakeAnimators();
+            BuildSnakeBody();
         }
     
         private void Update()
@@ -86,15 +84,17 @@ namespace Snake
             splinePath.Spline.RemoveAt(0);
 
             // set each bodypart to a specific percantage of the spline when updating the spline
-            for (int i = 0; i<bodyAnimators.Count; i++)
+            for (int i = 0; i<bodyParts.Count; i++)
             {
-                bodyAnimators[i].NormalizedTime = i * (1.0f/bodyAnimators.Count);
-                bodyAnimators[i].Play();
+                bodyParts[i].GetComponent<SplineAnimate>().NormalizedTime = i * (1.0f/bodyParts.Count);
+                bodyParts[i].GetComponent<SplineAnimate>().Play();
             }
         }
 
-        // Fill bodyParts (instantiated GameObjects) and bodyAnimators (SplineAnimate) for each part of the snake
-        private void BuildSnakeAnimators()
+        /// <summary>
+        /// Fill the List of bodyParts (instantiated GameObjects) with each part of the snake
+        /// </summary>
+        private void BuildSnakeBody()
         {
             // Tail
             bodyParts.Add(Instantiate(snakeTail));
@@ -117,7 +117,9 @@ namespace Snake
             ConfigureBodyAnimator(bodyParts[(int) (splinePath.Spline.GetLength()*2)-2]);
         }
 
-        // Set initial options like container and speed for the animator of each
+        /// <summary>
+        /// Ensure to set initial options like container and speed for the animator of each bodypart
+        /// </summary>
         private void ConfigureBodyAnimator(GameObject bodyPart)
         {
             SplineAnimate animate = bodyPart.GetComponent<SplineAnimate>();
@@ -125,7 +127,6 @@ namespace Snake
             animate.Loop = SplineAnimate.LoopMode.Once;
             animate.AnimationMethod = SplineAnimate.Method.Speed;
             animate.MaxSpeed = stepLength / stepInterval;
-            bodyAnimators.Add(animate);
         }
     }
 }
