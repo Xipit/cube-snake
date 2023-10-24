@@ -19,6 +19,8 @@ public class CubeSpawner : MonoBehaviour
     [Header("Snack")]
     public GameObject[] snackPrefabs;
 
+    public Snake.Snake snake;
+
     private Dimension3D Dimension;
 
     public static CubeSpawner Instance { get; private set; }
@@ -35,6 +37,7 @@ public class CubeSpawner : MonoBehaviour
         Cube cube = new Cube(Dimension);
 
         GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObject(new Vector3(0, 0, 0), Quaternion.identity, CubePreset);
+        cubeGameObject.transform.parent = RotationReferenceManager.Instance.transform;
 
         CubeDirector director = cubeGameObject.GetComponent<CubeDirector>();
         
@@ -44,6 +47,13 @@ public class CubeSpawner : MonoBehaviour
         // TODO add snack reference to snake -> so snake can "eat" snacks
         // TODO pass position of snakes Points, so snack wont spawn inside snake
         Snack snack = new Snack(snackPrefabs, cube, new CubePoint[] { });
+
+        if(!snake){
+            Debug.LogError("SNake reference has not been set. Cant start snake");
+            return;
+        }
+
+        snake.StartSnake(cube, CubeSideCoordinate.Front);
     }
 
     private void DetermineValuesFromGameMode(GameMode mode)

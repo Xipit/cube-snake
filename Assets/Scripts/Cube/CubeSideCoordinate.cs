@@ -176,7 +176,7 @@ static class CubeSideCoordinateMethods
                         return (CubeSideCoordinate.Back, DirectionOnCubeSide.posHor);
 
                     case DirectionOnCubeSide.negVert:
-                        return (CubeSideCoordinate.Down, DirectionOnCubeSide.posHor);
+                        return (CubeSideCoordinate.Down, DirectionOnCubeSide.negHor);
 
                     case DirectionOnCubeSide.posVert:
                         return (CubeSideCoordinate.Up, DirectionOnCubeSide.negHor);
@@ -196,7 +196,7 @@ static class CubeSideCoordinateMethods
                         return (CubeSideCoordinate.Front, DirectionOnCubeSide.posHor);
 
                     case DirectionOnCubeSide.negVert:
-                        return (CubeSideCoordinate.Down, DirectionOnCubeSide.negHor);
+                        return (CubeSideCoordinate.Down, DirectionOnCubeSide.posHor);
 
                     case DirectionOnCubeSide.posVert:
                         return (CubeSideCoordinate.Up, DirectionOnCubeSide.posHor);
@@ -279,6 +279,8 @@ static class CubeSideCoordinateMethods
                 return CubeSideCoordinate.Front;
         }
     }
+
+    
 
 }
 
