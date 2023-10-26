@@ -61,6 +61,11 @@ namespace Snake
             Snack.AssignNewPosition(Points.ToArray());
         }
 
+        private void Update()
+        {
+            InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
+        }
+
         private List<CubePoint> CreateStartPoints(Cube cube, CubeSideCoordinate startSide)
         {
             List<CubePoint> startPoints = new List<CubePoint>();
@@ -85,7 +90,6 @@ namespace Snake
             return startPoints;
         }
 
-
         private static BezierKnot AddKnotToPath(CubeFieldCoordinate fieldCoordinate, Quaternion rotationInCube, Vector3 positionInCube, float scaleFactor, bool isFirstKnot = false)
         {
             Vector3 positionInSide = fieldCoordinate.GetPositionInCubeSide(scaleFactor);
@@ -107,10 +111,6 @@ namespace Snake
             return startKnot;
         }
 
-        private void Update()
-        {
-            InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
-        }
 
         /// <summary>
         /// Set position of next spline point, according to current inputDirection.
@@ -177,6 +177,8 @@ namespace Snake
                     GameOver();
                 }
             }
+
+            RotationReferenceManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
         }
 
         private void EatSnack()
@@ -286,7 +288,7 @@ namespace Snake
             {
                 return snakeHead.GetPointOnSameSide(direction);
             }
-            else
+            else // snake moves across an edge
             {
                 (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
                 snakeHead.SideCoordinate.GetNeighborWithDirection(direction);

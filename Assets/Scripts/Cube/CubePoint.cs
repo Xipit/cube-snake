@@ -105,4 +105,9 @@ public class CubePoint
 
         return new CubePoint(SideCoordinate, nextFieldCoordinate);
     }
+
+    public override string ToString()
+    {
+        return this.SideCoordinate.ToString() + ": " + this.FieldCoordinate.ToString();
+    }
 }
