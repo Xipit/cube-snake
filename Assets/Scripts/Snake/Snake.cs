@@ -334,23 +334,23 @@ namespace Snake
         {
             // Tail
             BodyParts.Add(Instantiate(SnakeTailPrefab));
-            ConfigureBodyAnimator(0);
 
             // Body (iterate doubled index for more density in the body)
             for (int i = 1; i < (SplinePath.Spline.GetLength() * 2) - 3; i++) 
             {
                 BodyParts.Add(Instantiate(SnakeBodyPrefab));
-                ConfigureBodyAnimator(i);
-                Debug.Log(i + " Body");
             }
 
             // Head
             BodyParts.Add(Instantiate(SnakeHeadPrefab));
-            ConfigureBodyAnimator((int)(SplinePath.Spline.GetLength() * 2) - 3);
 
             // Empty
             BodyParts.Add(Instantiate(EmptyPrefab));
-            ConfigureBodyAnimator((int)(SplinePath.Spline.GetLength() * 2) - 2);
+
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                ConfigureBodyAnimator(i);
+            }
         }
 
         /// <summary>
@@ -377,6 +377,8 @@ namespace Snake
             animate.Loop = SplineAnimate.LoopMode.Once;
             animate.AnimationMethod = SplineAnimate.Method.Speed;
             animate.MaxSpeed = Cube.Scale / StepInterval;
+            
+            animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
     }
 }
