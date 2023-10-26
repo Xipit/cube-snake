@@ -46,14 +46,14 @@ public class CubeSpawner : MonoBehaviour
 
         // TODO add snack reference to snake -> so snake can "eat" snacks
         // TODO pass position of snakes Points, so snack wont spawn inside snake
-        Snack snack = new Snack(snackPrefabs, cube, new CubePoint[] { });
+        Snack snack = new Snack(snackPrefabs, cube);
 
         if(!snake){
             Debug.LogError("SNake reference has not been set. Cant start snake");
             return;
         }
 
-        snake.StartSnake(cube, CubeSideCoordinate.Front);
+        snake.StartSnake(cube, CubeSideCoordinate.Front, snack);
     }
 
     private void DetermineValuesFromGameMode(GameMode mode)
