@@ -30,9 +30,14 @@ namespace Snake
         public GameObject EmptyPrefab;
         private List<GameObject> BodyParts = new List<GameObject>();
 
-        public void StartSnake(Cube cube, CubeSideCoordinate startSide)
+        private Snack Snack;
+
+        private bool shouldGrowNextUpdate = false;
+
+        public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack)
         {
             this.Cube = cube;
+            this.Snack = snack;
             this.SplinePath = transform.GetComponent<SplineContainer>();
             this.Points = CreateStartPoints(cube, startSide);
 
@@ -51,6 +56,9 @@ namespace Snake
             // Start Cycle of Update Methods
             InvokeRepeating(nameof(DetermineNextStepDirection), StepInterval * 0.75f, StepInterval);
             InvokeRepeating(nameof(UpdateSpline), StepInterval, StepInterval);
+            
+            // Set first Snack on Cube
+            Snack.AssignNewPosition(Points.ToArray());
         }
 
         private List<CubePoint> CreateStartPoints(Cube cube, CubeSideCoordinate startSide)
@@ -137,14 +145,37 @@ namespace Snake
 
             DirectionOnCubeSide stepDirectionOnCubeSide = StepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
             CubePoint nextPoint = GetPointOnCubeInDirection(stepDirectionOnCubeSide);
- 
-            SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
-            SplinePath.Spline.RemoveAt(0);
-            
-            Points.Add(nextPoint);
-            Points.RemoveAt(0);
 
-            UpdateSnakeBody();
+            SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
+            Points.Add(nextPoint);
+            
+            if (shouldGrowNextUpdate is false)
+            {
+                SplinePath.Spline.RemoveAt(0);
+                Points.RemoveAt(0);
+            }
+            else
+            {
+                shouldGrowNextUpdate = false;
+            }
+            
+            // check if the snack is going to be eaten by the snake
+            if (nextPoint.IsEqual(Snack.Position))
+            {
+                EatSnack();
+            }
+            else
+            {
+                UpdateSnakeBody();
+            }
+        }
+
+        private void EatSnack()
+        {
+            Snack.AssignNewPosition(Points.ToArray());
+            AddSnakeBodyPart();
+            UpdateSnakeBodyAfterSnack();
+            shouldGrowNextUpdate = true;
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -265,8 +296,42 @@ namespace Snake
             // set each bodypart to a specific percantage of the spline when updating the spline
             for (int i = 0; i < BodyParts.Count; i++)
             {
-                BodyParts[i].GetComponent<SplineAnimate>().NormalizedTime = i * (1.0f / BodyParts.Count);
-                BodyParts[i].GetComponent<SplineAnimate>().Play();
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.StartOffset = 0;
+                bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
+                bodyPartAnimate.Play();
+            }
+        }
+
+        private void UpdateSnakeBodyAfterSnack()
+        {
+            // set each bodypart to a specific percantage of the spline 
+            //  - Tail and old BodyParts pause the animation
+            //  - new BodyParts, Head, and EmptyGameObject move further
+            
+            // Tail and old BodyParts
+            for (int i = 0; i < BodyParts.Count - 4; i++)
+            {
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.StartOffset = i * (1.0f / (BodyParts.Count - 2));
+                bodyPartAnimate.Pause();
+            }
+            
+            // new BodyParts
+            for (int i = BodyParts.Count - 4; i < BodyParts.Count - 2; i++)
+            {
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.StartOffset = (i - 2) * (1.0f / (BodyParts.Count - 2));
+                bodyPartAnimate.NormalizedTime = (i - 2) * (1.0f / (BodyParts.Count - 2));
+                bodyPartAnimate.Play();
+            }
+            
+            // Head and EmptyGameObject
+            for (int i = BodyParts.Count - 2; i < BodyParts.Count; i++)
+            {
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
+                bodyPartAnimate.Play();
             }
         }
 
@@ -277,23 +342,37 @@ namespace Snake
         {
             // Tail
             BodyParts.Add(Instantiate(SnakeTailPrefab));
-            ConfigureBodyAnimator(0);
 
             // Body (iterate doubled index for more density in the body)
             for (int i = 1; i < (SplinePath.Spline.GetLength() * 2) - 3; i++) 
             {
                 BodyParts.Add(Instantiate(SnakeBodyPrefab));
-                ConfigureBodyAnimator(i);
-                Debug.Log(i + " Body");
             }
 
             // Head
             BodyParts.Add(Instantiate(SnakeHeadPrefab));
-            ConfigureBodyAnimator((int)(SplinePath.Spline.GetLength() * 2) - 3);
 
             // Empty
             BodyParts.Add(Instantiate(EmptyPrefab));
-            ConfigureBodyAnimator((int)(SplinePath.Spline.GetLength() * 2) - 2);
+
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                ConfigureBodyAnimator(i);
+            }
+        }
+
+        /// <summary>
+        /// Add a new BodyPart to the snake. (At the moment: adds 2 BodyParts for more density)
+        /// </summary>
+        private void AddSnakeBodyPart()
+        {
+            int index = BodyParts.Count - 2;
+
+            for (int i = 0; i < 2; i++)
+            {
+                BodyParts.Insert(index, Instantiate(SnakeBodyPrefab));
+                ConfigureBodyAnimator(index);
+            }
         }
 
         /// <summary>
@@ -306,6 +385,8 @@ namespace Snake
             animate.Loop = SplineAnimate.LoopMode.Once;
             animate.AnimationMethod = SplineAnimate.Method.Speed;
             animate.MaxSpeed = Cube.Scale / StepInterval;
+            
+            animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
     }
 }
