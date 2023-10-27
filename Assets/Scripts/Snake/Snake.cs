@@ -32,7 +32,7 @@ namespace Snake
 
         private Snack Snack;
 
-        private bool removeNextPoint = true;
+        private bool shouldGrowNextUpdate = false;
 
         public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack)
         {
@@ -149,29 +149,33 @@ namespace Snake
             SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
             Points.Add(nextPoint);
             
-            
-            if (removeNextPoint)
+            if (shouldGrowNextUpdate is false)
             {
                 SplinePath.Spline.RemoveAt(0);
                 Points.RemoveAt(0);
             }
             else
             {
-                removeNextPoint = true;
+                shouldGrowNextUpdate = false;
             }
             
-            // Check if Snack is on Point
+            // check if the snack is going to be eaten by the snake
             if (nextPoint.IsEqual(Snack.Position))
             {
-                Snack.AssignNewPosition(Points.ToArray());
-                AddSnakeBodyPart();
-                UpdateSnakeBodyAfterSnack();
-                removeNextPoint = false;
+                EatSnack();
             }
             else
             {
                 UpdateSnakeBody();
             }
+        }
+
+        private void EatSnack()
+        {
+            Snack.AssignNewPosition(Points.ToArray());
+            AddSnakeBodyPart();
+            UpdateSnakeBodyAfterSnack();
+            shouldGrowNextUpdate = true;
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -292,9 +296,10 @@ namespace Snake
             // set each bodypart to a specific percantage of the spline when updating the spline
             for (int i = 0; i < BodyParts.Count; i++)
             {
-                BodyParts[i].GetComponent<SplineAnimate>().StartOffset = 0;
-                BodyParts[i].GetComponent<SplineAnimate>().NormalizedTime = i * (1.0f / BodyParts.Count);
-                BodyParts[i].GetComponent<SplineAnimate>().Play();
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.StartOffset = 0;
+                bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
+                bodyPartAnimate.Play();
             }
         }
 
@@ -307,23 +312,26 @@ namespace Snake
             // Tail and old BodyParts
             for (int i = 0; i < BodyParts.Count - 4; i++)
             {
-                BodyParts[i].GetComponent<SplineAnimate>().StartOffset = i * (1.0f / (BodyParts.Count - 2));
-                BodyParts[i].GetComponent<SplineAnimate>().Pause();
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.StartOffset = i * (1.0f / (BodyParts.Count - 2));
+                bodyPartAnimate.Pause();
             }
             
             // new BodyParts
             for (int i = BodyParts.Count - 4; i < BodyParts.Count - 2; i++)
             {
-                BodyParts[i].GetComponent<SplineAnimate>().StartOffset = (i - 2) * (1.0f / (BodyParts.Count - 2));
-                BodyParts[i].GetComponent<SplineAnimate>().NormalizedTime = (i - 2) * (1.0f / (BodyParts.Count - 2));
-                BodyParts[i].GetComponent<SplineAnimate>().Play();
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.StartOffset = (i - 2) * (1.0f / (BodyParts.Count - 2));
+                bodyPartAnimate.NormalizedTime = (i - 2) * (1.0f / (BodyParts.Count - 2));
+                bodyPartAnimate.Play();
             }
             
             // Head and EmptyGameObject
             for (int i = BodyParts.Count - 2; i < BodyParts.Count; i++)
             {
-                BodyParts[i].GetComponent<SplineAnimate>().NormalizedTime = i * (1.0f / BodyParts.Count);
-                BodyParts[i].GetComponent<SplineAnimate>().Play();
+                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
+                bodyPartAnimate.Play();
             }
         }
 
