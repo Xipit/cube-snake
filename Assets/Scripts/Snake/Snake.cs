@@ -168,6 +168,15 @@ namespace Snake
             {
                 UpdateSnakeBody();
             }
+            
+            // check if a snakeBodyPart is on this point --> GameOver
+            for (int i = 0; i < Points.Count - 2; i++)
+            {
+                if (nextPoint.IsEqual(Points[i]))
+                {
+                    GameOver();
+                }
+            }
         }
 
         private void EatSnack()
@@ -335,6 +344,17 @@ namespace Snake
             }
         }
 
+        private void StopSnake()
+        {
+            for (int i = 0; i < BodyParts.Count - 1; i++)
+            {
+                SplineAnimate animate = BodyParts[i].GetComponent<SplineAnimate>();
+            
+                animate.StartOffset = i * (1.0f / BodyParts.Count);
+                animate.Pause();
+            }
+        }
+
         /// <summary>
         /// Fill the List of BodyParts (instantiated GameObjects) with each part of the snake
         /// </summary>
@@ -387,6 +407,14 @@ namespace Snake
             animate.MaxSpeed = Cube.Scale / StepInterval;
             
             animate.StartOffset = index * (1.0f / BodyParts.Count);
+        }
+        
+        private void GameOver()
+        {
+            StopSnake();
+            
+            CancelInvoke(nameof(DetermineNextStepDirection));
+            CancelInvoke(nameof(UpdateSpline));
         }
     }
 }
