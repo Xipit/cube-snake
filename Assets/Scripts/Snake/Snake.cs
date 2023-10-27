@@ -169,7 +169,7 @@ namespace Snake
                 UpdateSnakeBody();
             }
             
-            // check if a snakeBodyPart is on this point --> GameOver
+            // check if a snakeBodyPart is on the next point --> GameOver
             for (int i = 0; i < Points.Count - 2; i++)
             {
                 if (nextPoint.IsEqual(Points[i]))
