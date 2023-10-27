@@ -96,7 +96,7 @@ namespace Snake
                 false => positionInCube + rotationInCube * (positionInSide + new Vector3(0.5f * scaleFactor, 0, 0))
             };
 
-            Vector3 rotation = new Vector3(0, 90, 270);
+            Vector3 rotation = new Vector3(0, 90, 90);
 
             BezierKnot startKnot = new BezierKnot();
             startKnot.Position = startPositionOfSnake;
@@ -238,10 +238,10 @@ namespace Snake
                 case CubeSideCoordinate.Left:
                     rotationOnSide = stepDirectionOnCubeSide switch
                     {
-                        DirectionOnCubeSide.negHor => new Vector3(-90, 90, 270),
+                        DirectionOnCubeSide.negHor => new Vector3(90, -90, -90),
                         DirectionOnCubeSide.posHor => new Vector3(90, 90, 90),
-                        DirectionOnCubeSide.negVert => new Vector3(-180, 0, 0),
-                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 0),
+                        DirectionOnCubeSide.negVert => new Vector3(-180, 90, 90),
+                        DirectionOnCubeSide.posVert => new Vector3(0, 180, 0),
                         _ => throw new ArgumentOutOfRangeException()
                     };
                     break;
@@ -249,10 +249,10 @@ namespace Snake
                 case CubeSideCoordinate.Up:
                     rotationOnSide = stepDirectionOnCubeSide switch
                     {
-                        DirectionOnCubeSide.negHor => new Vector3(0, -90, 0),
-                        DirectionOnCubeSide.posHor => new Vector3(0, 90, 0),
+                        DirectionOnCubeSide.negHor => new Vector3(0, -90, 180),
+                        DirectionOnCubeSide.posHor => new Vector3(0, 90, 180),
                         DirectionOnCubeSide.negVert => new Vector3(-180, 0, 0),
-                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 0),
+                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 180),
                         _ => throw new ArgumentOutOfRangeException()
                     };
                     break;
@@ -260,10 +260,10 @@ namespace Snake
                 case CubeSideCoordinate.Down:
                     rotationOnSide = stepDirectionOnCubeSide switch
                     {
-                        DirectionOnCubeSide.negHor => new Vector3(0, 90, 0),
-                        DirectionOnCubeSide.posHor => new Vector3(0, -90, 0),
+                        DirectionOnCubeSide.negHor => new Vector3(0, 90, 180),
+                        DirectionOnCubeSide.posHor => new Vector3(0, -90, 180),
                         DirectionOnCubeSide.negVert => new Vector3(-180, 0, 0),
-                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 0),
+                        DirectionOnCubeSide.posVert => new Vector3(0, 0, 180),
                         _ => throw new ArgumentOutOfRangeException()
                     };
                     break;
