@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Tunnel 
 {
-    CubePoint PointA;
-    CubePoint PointB;
+    public CubePoint PointA;
+    public CubePoint PointB;
 
     public Tunnel (CubePoint pointA, CubePoint pointB)
     {

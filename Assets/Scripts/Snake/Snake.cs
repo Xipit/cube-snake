@@ -34,6 +34,11 @@ namespace Snake
         private Snack Snack;
 
         private bool shouldGrowNextUpdate = false;
+        private bool GoesThroughTunnel = false;
+        private int StepsInsideTunnel = 3;
+        private int StepsInsideTunnelCounter = 0;
+        private Tunnel Tunnel;
+        private CubePoint? TunnelEntry;
 
         public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack, GameMode mode)
         {
@@ -154,18 +159,79 @@ namespace Snake
             DirectionOnCubeSide stepDirectionOnCubeSide = StepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
             CubePoint nextPoint = GetPointOnCubeInDirection(stepDirectionOnCubeSide);
 
-            SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
-            Points.Add(nextPoint);
-
-            if (shouldGrowNextUpdate is false)
+            foreach (Tunnel tunnel in Cube.Tunnels)
             {
+                if (tunnel.HasPoint(nextPoint))
+                {
+                    GoesThroughTunnel = true;
+                    Tunnel = tunnel;
+                    TunnelEntry = tunnel.PointA.IsEqual(nextPoint) ? tunnel.PointA : tunnel.PointB;
+                }
+            }
+
+            if (GoesThroughTunnel && StepsInsideTunnelCounter <= StepsInsideTunnel && TunnelEntry != null)
+            {
+                // Add new knot to Spline
+                // TunnelEntry
+                if (StepsInsideTunnelCounter == 0)
+                {
+                    SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry));
+                    Points.Add(TunnelEntry);
+                    Points.RemoveAt(0);
+                }
+                // TunnelExit
+                else if (StepsInsideTunnelCounter == StepsInsideTunnel)
+                {
+                    if (TunnelEntry.IsEqual(Tunnel.PointA))
+                    {
+                        SplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointB));
+                        Points.Add(Tunnel.PointB);
+                    }
+                    else if (TunnelEntry.IsEqual(Tunnel.PointB))
+                    {
+                        SplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointA));
+                        Points.Add(Tunnel.PointA);
+                    }
+
+                    Points.RemoveAt(0);
+                    UpdateReferenceDirectionForInputAfterTunnelExit(TunnelEntry);
+                    TunnelEntry = null;
+
+                }
+                // Everything between TunnelEntry and TunnelExit
+                else
+                {
+                    BezierKnot bezierKnot = new BezierKnot();
+                    bezierKnot.Position = Vector3.zero;
+                    bezierKnot.Rotation = Quaternion.identity;
+
+                    SplinePath.Spline.Add(bezierKnot);
+                }
+
+
+                StepsInsideTunnelCounter++;
                 SplinePath.Spline.RemoveAt(0);
-                Points.RemoveAt(0);
             }
             else
             {
-                shouldGrowNextUpdate = false;
+                GoesThroughTunnel = false;
+                StepsInsideTunnelCounter = 0;
+
+
+                SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
+                Points.Add(nextPoint);
+
+                if (ShouldGrowNextUpdate is false)
+                {
+                    SplinePath.Spline.RemoveAt(0);
+                    Points.RemoveAt(0);
+                }
+                else
+                {
+                    ShouldGrowNextUpdate = false;
+                }
             }
+
 
             // check if the snack is going to be eaten by the snake
             if (nextPoint.IsEqual(Snack.Position))
@@ -186,7 +252,7 @@ namespace Snake
                     GameManager.Instance.GameOver();
                 }
             }
-            
+
             RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
         }
 
@@ -195,7 +261,40 @@ namespace Snake
             Snack.AssignNewPosition(Points.ToArray());
             AddSnakeBodyPart();
             UpdateSnakeBodyAfterSnack();
-            shouldGrowNextUpdate = true;
+            GameAudioManager.Instance.EatSnackAudioSource.Play();
+            ShouldGrowNextUpdate = true;
+        }
+
+        private void UpdateReferenceDirectionForInputAfterTunnelExit(CubePoint tunnelEntry)
+        {
+            InputDirection stepDirection = InputDirection.Right;
+
+            // ---
+
+            DirectionOnCubeSide direction = stepDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
+
+            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
+                tunnelEntry.SideCoordinate.GetNeighborWithDirection(direction);
+
+            ReferenceDirectionForInput =
+                stepDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
+
+
+            // ---
+
+            direction = stepDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
+
+            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) oppositeSide =
+                nextSide.neighborCoordinate.GetNeighborWithDirection(direction);
+
+            ReferenceDirectionForInput =
+                stepDirection.GetInputUpAsDirectionOnCubeSide(oppositeSide.neighborDirection);
+
+
+            // ---
+
+            RotationReferenceManager.Instance.Rotate(stepDirection);
+            RotationReferenceManager.Instance.Rotate(stepDirection);
             GameAudioManager.Instance.EatSnackAudioSource.Play();
         }
 
@@ -206,7 +305,9 @@ namespace Snake
             BezierKnot bezierKnot = new BezierKnot();
 
             bezierKnot.Position = CalculateKnotPosition(cubePoint, stepDirectionOnCubeSide);
-            bezierKnot.Rotation = CalculateKnotRotation(cubePoint, stepDirectionOnCubeSide);
+            bezierKnot.Rotation = GoesThroughTunnel
+                ? CalculateKnotRotationInTunnel(cubePoint, stepDirectionOnCubeSide)
+                : CalculateKnotRotation(cubePoint, stepDirectionOnCubeSide);
             bezierKnot.TangentIn = new Vector3(0, 0, -0.33f);
             bezierKnot.TangentOut = new Vector3(0, 0, 0.33f);
 
@@ -221,17 +322,80 @@ namespace Snake
             // position of the center of a field
             Vector3 positionInSide = point.FieldCoordinate.GetPositionInCubeSide(Cube.Scale);
 
-            // move the position to the edge of the field, to which the snake moves
-            positionInSide += (stepDirectionOnCubeSide switch
+            // move the position to the edge of the field, to which the snake moves. Except it is a tunnelField, than we need the centered position.
+            if (!GoesThroughTunnel)
             {
-                DirectionOnCubeSide.negHor => new Vector3(-1, 0, 0) * 0.5f * Cube.Scale,
-                DirectionOnCubeSide.posHor => new Vector3(1, 0, 0) * 0.5f * Cube.Scale,
-                DirectionOnCubeSide.negVert => new Vector3(0, 0, -1) * 0.5f * Cube.Scale,
-                DirectionOnCubeSide.posVert => new Vector3(0, 0, 1) * 0.5f * Cube.Scale,
-                _ => new Vector3(0, 0, 0)
-            });
+                positionInSide += (stepDirectionOnCubeSide switch
+                {
+                    DirectionOnCubeSide.negHor => new Vector3(-1, 0, 0) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.posHor => new Vector3(1, 0, 0) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.negVert => new Vector3(0, 0, -1) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.posVert => new Vector3(0, 0, 1) * 0.5f * Cube.Scale,
+                    _ => new Vector3(0, 0, 0)
+                });
+            }
+
 
             return positionInCube + (rotationInCube * positionInSide);
+        }
+
+        private Quaternion CalculateKnotRotationInTunnel(CubePoint point, DirectionOnCubeSide stepDirectionOnCubeSide)
+        {
+            Quaternion sideRotation = point.SideCoordinate.GetRotationInCube();
+
+            Vector3 rotationOnSide;
+
+            // The rotation of the knot must point into the cube if the point is a TunnelEntry. If it is a TunnelExit, it must point away from the cube.
+            bool isTunnelEntry = point.IsEqual(TunnelEntry!);
+
+            // this switch is essential for the rotation of a knot on a cubeSide when the snake moves into the cube
+            // I couldn't get the rotation around a specific point, so it needed this workaround
+            switch (point.SideCoordinate)
+            {
+                case CubeSideCoordinate.Front:
+                case CubeSideCoordinate.Right:
+                case CubeSideCoordinate.Back:
+                case CubeSideCoordinate.Left:
+                    rotationOnSide = stepDirectionOnCubeSide switch
+                    {
+                        DirectionOnCubeSide.negHor => isTunnelEntry ? new Vector3(90, 0, -90) : new Vector3(90, -180, -90),
+                        DirectionOnCubeSide.posHor => isTunnelEntry ? new Vector3(90, 0, 90) : new Vector3(90, 180, 90),
+                        DirectionOnCubeSide.negVert => isTunnelEntry ? new Vector3(-270, 90, 90) : new Vector3(-90, 90, 90),
+                        DirectionOnCubeSide.posVert => isTunnelEntry ? new Vector3(-90, 180, 0) : new Vector3(90, 180, 0),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    break;
+
+                case CubeSideCoordinate.Up:
+                    rotationOnSide = stepDirectionOnCubeSide switch
+                    {
+                        DirectionOnCubeSide.negHor => isTunnelEntry ? new Vector3(90, -90, 180) : new Vector3(-90, -90, 180),
+                        DirectionOnCubeSide.posHor => isTunnelEntry ? new Vector3(90, 90, 180) : new Vector3(-90, 90, 180),
+                        DirectionOnCubeSide.negVert => isTunnelEntry ? new Vector3(90, 0, 0) : new Vector3(-90, 0, 0),
+                        DirectionOnCubeSide.posVert => isTunnelEntry ? new Vector3(90, 0, 180) : new Vector3(-90, 0, 180),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    break;
+
+                case CubeSideCoordinate.Down:
+                    rotationOnSide = stepDirectionOnCubeSide switch
+                    {
+                        DirectionOnCubeSide.negHor => isTunnelEntry ? new Vector3(-90, 90, 180) : new Vector3(90, 90, 180),
+                        DirectionOnCubeSide.posHor => isTunnelEntry ? new Vector3(-90, -90, 180) : new Vector3(90, -90, 180),
+                        DirectionOnCubeSide.negVert => isTunnelEntry ? new Vector3(-90, 0, 0) : new Vector3(-270, 0, 0),
+                        DirectionOnCubeSide.posVert => isTunnelEntry ? new Vector3(-90, 0, 180) : new Vector3(90, 0, 180),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    break;
+
+                default:
+                    rotationOnSide = Vector3.zero;
+                    break;
+            }
+
+            Vector3 rotation = sideRotation.eulerAngles + rotationOnSide;
+
+            return Quaternion.Euler(rotation);
         }
 
         private Quaternion CalculateKnotRotation(CubePoint point, DirectionOnCubeSide stepDirectionOnCubeSide)
@@ -429,6 +593,8 @@ namespace Snake
 
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));
+
+            Debug.Log("Game Over");
         }
     }
 }
