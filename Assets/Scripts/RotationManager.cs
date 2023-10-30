@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Snake;
 using UnityEngine;
+using Extensions;
 
 /// <summary>
 /// Responsible for rotating the cube (and snake).
@@ -13,7 +14,7 @@ public class RotationManager : MonoBehaviour
 {
     public GameObject RotationOrigin;
 
-    private float RotationPerSide = 75;
+    private float RotationPerSide = 70;
     private float RotationSpeed = 0.4F;
 
     public static RotationManager Instance { get; private set; }
@@ -55,9 +56,13 @@ public class RotationManager : MonoBehaviour
     /// Rotate the cube when crossing the edge.
     /// </summary>
     /// <param name="stepDirection"></param>
-    public void RotateOneSide(InputDirection stepDirection)
+    public void RotateOneSide(InputDirection stepDirection, CubePoint point, Dimension3D cubeDimension)
     {
         RotateOrigin(stepDirection, RotationPerSide, true);
+
+        // Clean rotation drift, which will otherwise accumulate over time
+        SnapRotationTo90Degrees();
+        RotateToCubePoint(point, cubeDimension);
     }
 
     /// <summary>
@@ -87,9 +92,9 @@ public class RotationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Rotate cube to align with snake start position.
+    /// Rotate cube to align with cube point.
     /// </summary>
-    public void RotateToStartPoint(CubePoint point, Dimension3D cubeDimension)
+    public void RotateToCubePoint(CubePoint point, Dimension3D cubeDimension)
     {
         Dimension2D sideDimension = point.SideCoordinate.GetDimension2D(cubeDimension);
         CubeFieldCoordinate fieldCoordinate = point.FieldCoordinate;
@@ -135,4 +140,13 @@ public class RotationManager : MonoBehaviour
             RotationSpeed = 0.05F;
         }
     }
+
+    private void SnapRotationTo90Degrees()
+    {
+        Quaternion cleanedRotation = RotationOrigin.transform.rotation.SnapToNearestRightAngle();
+
+        RotationOrigin.transform.rotation = cleanedRotation;
+    }
+
+    
 }

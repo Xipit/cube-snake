@@ -23,6 +23,11 @@ public class GameManager : MonoBehaviour
         CubeSpawner.Instance.SpawnCube(Mode);
     }
 
+    public void GameOver()
+    {
+        // TODO
+    }
+
     public void Start()
     {
         StartGame();
