@@ -53,6 +53,8 @@ namespace Snake
             // This defines how the cube is rotated on the spawnSide, so that _Up_ Input matches _Up_ on the screen
             ReferenceDirectionForInput = DirectionOnCubeSide.posVert;
 
+            RotationManager.Instance.RotateToStartPoint(Points.Last(), Cube.Dimension);
+
             // Start Cycle of Update Methods
             InvokeRepeating(nameof(DetermineNextStepDirection), StepInterval * 0.75f, StepInterval);
             InvokeRepeating(nameof(UpdateSpline), StepInterval, StepInterval);
@@ -178,7 +180,7 @@ namespace Snake
                 }
             }
 
-            RotationReferenceManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
+            RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
         }
 
         private void EatSnack()
@@ -296,7 +298,7 @@ namespace Snake
                 CubePoint nextPoint = snakeHead.GetPointOnNeighbour(direction, Cube);
 
                 ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
-                RotationReferenceManager.Instance.Rotate(StepInputDirection);
+                RotationManager.Instance.RotateOneSide(StepInputDirection);
 
                 return nextPoint;
             }
