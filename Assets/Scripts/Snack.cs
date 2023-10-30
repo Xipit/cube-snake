@@ -47,7 +47,7 @@ public class Snack
 
         // Instantiate prefab on cube
         SnackGameObject = InstantiateManager.Instance.InstantiateGameObject(snackPosition, rotationInCube, prefab);
-        SnackGameObject!.transform.parent = RotationReferenceManager.Instance.transform;
+        SnackGameObject!.transform.parent = RotationManager.Instance.transform;
 
         // we need to change localPosition and the localRotation of the prefab.
         // Otherwise the snack would spawn somewhere else on the cube without the right rotation.

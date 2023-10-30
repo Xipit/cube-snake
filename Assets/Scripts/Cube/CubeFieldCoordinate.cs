@@ -15,16 +15,17 @@ public class CubeFieldCoordinate
         this.H = h;
         this.V = v;
     }
-}
 
-// the following methods are invoked by e.g. CubeFieldCoordinate.GetPositionInCubeSide(cubeScale);
-static class CubeFieldCoordinateMethods
-{
-    public static Vector3 GetPositionInCubeSide(this CubeFieldCoordinate coordinate, float cubeScale)
+    public Vector3 GetPositionInCubeSide(float cubeScale)
     {
         return new Vector3(
-            coordinate.H + cubeScale / 2,
+            H + cubeScale / 2,
             0,
-            coordinate.V + cubeScale / 2);
+            V + cubeScale / 2);
+    }
+
+    public override string ToString()
+    {
+        return "[H: " + H + ", V: " + V + "]";
     }
 }
