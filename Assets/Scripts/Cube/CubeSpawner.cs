@@ -37,7 +37,7 @@ public class CubeSpawner : MonoBehaviour
         Cube cube = new Cube(Dimension);
 
         GameObject cubeGameObject = InstantiateManager.Instance.InstantiateGameObject(new Vector3(0, 0, 0), Quaternion.identity, CubePreset);
-        cubeGameObject.transform.parent = RotationReferenceManager.Instance.transform;
+        cubeGameObject.transform.parent = RotationManager.Instance.transform;
 
         CubeDirector director = cubeGameObject.GetComponent<CubeDirector>();
         

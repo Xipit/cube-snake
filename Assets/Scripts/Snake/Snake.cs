@@ -55,12 +55,19 @@ namespace Snake
             // This defines how the cube is rotated on the spawnSide, so that _Up_ Input matches _Up_ on the screen
             ReferenceDirectionForInput = DirectionOnCubeSide.posVert;
 
+            RotationManager.Instance.RotateToStartPoint(Points.Last(), Cube.Dimension);
+
             // Start Cycle of Update Methods
             InvokeRepeating(nameof(DetermineNextStepDirection), StepInterval * 0.75f, StepInterval);
             InvokeRepeating(nameof(UpdateSpline), StepInterval, StepInterval);
 
             // Set first Snack on Cube
             Snack.AssignNewPosition(Points.ToArray());
+        }
+
+        private void Update()
+        {
+            InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
         }
 
         private List<CubePoint> CreateStartPoints(Cube cube, CubeSideCoordinate startSide)
@@ -87,7 +94,6 @@ namespace Snake
             return startPoints;
         }
 
-
         private static BezierKnot AddKnotToPath(CubeFieldCoordinate fieldCoordinate, Quaternion rotationInCube, Vector3 positionInCube, float scaleFactor, bool isFirstKnot = false)
         {
             Vector3 positionInSide = fieldCoordinate.GetPositionInCubeSide(scaleFactor);
@@ -109,10 +115,6 @@ namespace Snake
             return startKnot;
         }
 
-        private void Update()
-        {
-            InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
-        }
 
         /// <summary>
         /// Set position of next spline point, according to current inputDirection.
@@ -180,6 +182,8 @@ namespace Snake
                     GameOver();
                 }
             }
+
+            RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
             // Update Coordinate for SFX
             CurrentSideCoordinate = nextPoint.SideCoordinate;
         }
@@ -292,7 +296,7 @@ namespace Snake
             {
                 return snakeHead.GetPointOnSameSide(direction);
             }
-            else
+            else // snake moves across an edge
             {
                 (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
                 snakeHead.SideCoordinate.GetNeighborWithDirection(direction);
@@ -300,7 +304,7 @@ namespace Snake
                 CubePoint nextPoint = snakeHead.GetPointOnNeighbour(direction, Cube);
 
                 ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
-                RotationReferenceManager.Instance.Rotate(StepInputDirection);
+                RotationManager.Instance.RotateOneSide(StepInputDirection);
 
                 return nextPoint;
             }
