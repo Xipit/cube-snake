@@ -176,7 +176,8 @@ namespace Snake
             {
                 if (nextPoint.IsEqual(Points[i]))
                 {
-                    GameOver();
+                    StopSnake();
+                    GameManager.Instance.GameOver();
                 }
             }
 
@@ -348,14 +349,14 @@ namespace Snake
             }
         }
 
-        private void StopSnake()
+        private void PauseSnake()
         {
             for (int i = 0; i < BodyParts.Count - 1; i++)
             {
                 SplineAnimate animate = BodyParts[i].GetComponent<SplineAnimate>();
             
                 animate.StartOffset = i * (1.0f / BodyParts.Count);
-                animate.Pause();
+                animate.MaxSpeed = 0; // Pause
             }
         }
 
@@ -413,9 +414,9 @@ namespace Snake
             animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
         
-        private void GameOver()
+        private void StopSnake()
         {
-            StopSnake();
+            PauseSnake();
             
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));
