@@ -174,6 +174,7 @@ namespace Snake
             {
                 if (nextPoint.IsEqual(Points[i]))
                 {
+                    GetComponent<GameOver>().OnGameOver();
                     GameOver();
                 }
             }
@@ -185,6 +186,7 @@ namespace Snake
             AddSnakeBodyPart();
             UpdateSnakeBodyAfterSnack();
             shouldGrowNextUpdate = true;
+            GetComponent<SnackEating>().OnSnackEaten();
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
