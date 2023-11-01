@@ -21,7 +21,7 @@ public class BackgroundMusic : MonoBehaviour
         {
             Debug.LogError("AudioSource not found");
         }
-        
+
     }
 
     public void StopMusic()
@@ -35,6 +35,6 @@ public class BackgroundMusic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

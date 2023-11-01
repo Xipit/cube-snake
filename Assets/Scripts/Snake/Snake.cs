@@ -420,16 +420,9 @@ namespace Snake
             animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
 
-        private void GameOver()
+        private void StopSnake()
         {
-
-            StopSnake();
-
-            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Searching for Background Music Script
-            if (backgroundMusic != null)
-            {
-                backgroundMusic.StopMusic();
-            }
+            PauseSnake();
 
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));
