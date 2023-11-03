@@ -293,9 +293,8 @@ namespace Snake
 
             // ---
 
-            RotationReferenceManager.Instance.Rotate(stepDirection);
-            RotationReferenceManager.Instance.Rotate(stepDirection);
-            GameAudioManager.Instance.EatSnackAudioSource.Play();
+            //RotationReferenceManager.Instance.Rotate(stepDirection);
+            //RotationReferenceManager.Instance.Rotate(stepDirection);
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
