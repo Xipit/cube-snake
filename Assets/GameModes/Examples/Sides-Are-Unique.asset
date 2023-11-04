@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dimensionsAreRandom: 0
   cubeIsSquare: 0
-  dimension: {x: 9, y: 9, z: 9}
+  dimension: {x: 4, y: 5, z: 6}
   sidesAreUnique: 1

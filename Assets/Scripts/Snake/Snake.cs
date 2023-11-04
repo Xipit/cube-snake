@@ -40,6 +40,12 @@ namespace Snake
         private Tunnel Tunnel;
         private CubePoint? TunnelEntry;
 
+        private bool ShouldMoveOverEdge;
+        private DirectionOnCubeSide TempReferenceDirectionForInput;
+
+        private bool ShouldMoveOverEdge;
+        private DirectionOnCubeSide TempReferenceDirectionForInput;
+
         public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack, GameMode mode)
         {
             this.Cube = cube;
@@ -171,13 +177,18 @@ namespace Snake
 
             if (GoesThroughTunnel && StepsInsideTunnelCounter <= StepsInsideTunnel && TunnelEntry != null)
             {
-                // Add new knot to Spline
+                // Add new knot to Spline && new Point to Points
                 // TunnelEntry
                 if (StepsInsideTunnelCounter == 0)
                 {
+                    if (ShouldMoveOverEdge)
+                    {
+                        RotationManager.Instance.RotateOneSide(StepInputDirection, nextPoint, Cube.Dimension);
+                        ReferenceDirectionForInput = TempReferenceDirectionForInput;
+                    }
+
                     SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry));
                     Points.Add(TunnelEntry);
-                    Points.RemoveAt(0);
                 }
                 // TunnelExit
                 else if (StepsInsideTunnelCounter == StepsInsideTunnel)
@@ -193,10 +204,7 @@ namespace Snake
                         Points.Add(Tunnel.PointA);
                     }
 
-                    Points.RemoveAt(0);
-                    UpdateReferenceDirectionForInputAfterTunnelExit(TunnelEntry);
-                    TunnelEntry = null;
-
+                    GetReferenceDirectionForInputOnOppositeSide(TunnelEntry);
                 }
                 // Everything between TunnelEntry and TunnelExit
                 else
@@ -206,17 +214,24 @@ namespace Snake
                     bezierKnot.Rotation = Quaternion.identity;
 
                     SplinePath.Spline.Add(bezierKnot);
+                    Points.Add(TunnelEntry);
                 }
-
 
                 StepsInsideTunnelCounter++;
                 SplinePath.Spline.RemoveAt(0);
+                Points.RemoveAt(0);
             }
             else
             {
                 GoesThroughTunnel = false;
                 StepsInsideTunnelCounter = 0;
+                TunnelEntry = null;
 
+                if (ShouldMoveOverEdge)
+                {
+                    RotationManager.Instance.RotateOneSide(StepInputDirection, nextPoint, Cube.Dimension);
+                    ReferenceDirectionForInput = TempReferenceDirectionForInput;
+                }
 
                 SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
                 Points.Add(nextPoint);
@@ -230,6 +245,8 @@ namespace Snake
                 {
                     ShouldGrowNextUpdate = false;
                 }
+
+                RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
             }
 
 
@@ -252,8 +269,6 @@ namespace Snake
                     GameManager.Instance.GameOver();
                 }
             }
-
-            RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
         }
 
         private void EatSnack()
@@ -265,36 +280,29 @@ namespace Snake
             ShouldGrowNextUpdate = true;
         }
 
-        private void UpdateReferenceDirectionForInputAfterTunnelExit(CubePoint tunnelEntry)
+        private void GetReferenceDirectionForInputOnOppositeSide(CubePoint point)
         {
-            InputDirection stepDirection = InputDirection.Right;
+            DirectionOnCubeSide direction = StepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
 
-            // ---
+            for (int i = 0; i < 2; i++)
+            {
+                CubePoint nextPoint = point.GetPointOnNeighbour(direction, Cube);
 
-            DirectionOnCubeSide direction = stepDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
+                (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
+                    point.SideCoordinate.GetNeighborWithDirection(direction);
 
-            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
-                tunnelEntry.SideCoordinate.GetNeighborWithDirection(direction);
+                ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
 
-            ReferenceDirectionForInput =
-                stepDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
+                point = nextPoint;
+                direction = nextSide.neighborDirection;
 
-
-            // ---
-
-            direction = stepDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
-
-            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) oppositeSide =
-                nextSide.neighborCoordinate.GetNeighborWithDirection(direction);
-
-            ReferenceDirectionForInput =
-                stepDirection.GetInputUpAsDirectionOnCubeSide(oppositeSide.neighborDirection);
+                //RotationManager.Instance.RotateOneSide(stepDirection, point, Cube.Dimension);
+            }
 
 
-            // ---
-
-            //RotationReferenceManager.Instance.Rotate(stepDirection);
-            //RotationReferenceManager.Instance.Rotate(stepDirection);
+            // TODO need to look into this
+            Debug.Log("Rotate cube 180 degrees");
+            RotationManager.Instance.RotateToOppositeSide(StepInputDirection);
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -459,6 +467,7 @@ namespace Snake
 
             if (Cube.Sides[(int)snakeHead.SideCoordinate].Dimension.IsPointInDirectionInDimension(snakeHead, direction))
             {
+                ShouldMoveOverEdge = false;
                 return snakeHead.GetPointOnSameSide(direction);
             }
             else // snake moves across an edge 
@@ -468,8 +477,8 @@ namespace Snake
 
                 CubePoint nextPoint = snakeHead.GetPointOnNeighbour(direction, Cube);
 
-                ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
-                RotationManager.Instance.RotateOneSide(StepInputDirection, snakeHead, Cube.Dimension);
+                ShouldMoveOverEdge = true;
+                TempReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
 
                 GameAudioManager.Instance.SwitchCubeSide(nextPoint.SideCoordinate);
 
