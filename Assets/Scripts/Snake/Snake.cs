@@ -13,11 +13,13 @@ namespace Snake
     {
         private List<CubePoint> Points;
         private Cube Cube;
-        
+
         public SplineContainer SplinePath { get; private set; }
+        public CubeSideCoordinate CurrentSideCoordinate { get; private set; }
+
 
         public float StepInterval;
-    
+
         private InputDirection StepInputDirection;
         public InputDirection InputDirection;
 
@@ -56,7 +58,7 @@ namespace Snake
             // Start Cycle of Update Methods
             InvokeRepeating(nameof(DetermineNextStepDirection), StepInterval * 0.75f, StepInterval);
             InvokeRepeating(nameof(UpdateSpline), StepInterval, StepInterval);
-            
+
             // Set first Snack on Cube
             Snack.AssignNewPosition(Points.ToArray());
         }
@@ -121,7 +123,7 @@ namespace Snake
             {
                 return;
             }
-            
+
             StepInputDirection = InputDirection;
 
             VisualiseNextStepDirection();
@@ -148,7 +150,7 @@ namespace Snake
 
             SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
             Points.Add(nextPoint);
-            
+
             if (shouldGrowNextUpdate is false)
             {
                 SplinePath.Spline.RemoveAt(0);
@@ -158,7 +160,7 @@ namespace Snake
             {
                 shouldGrowNextUpdate = false;
             }
-            
+
             // check if the snack is going to be eaten by the snake
             if (nextPoint.IsEqual(Snack.Position))
             {
@@ -168,7 +170,7 @@ namespace Snake
             {
                 UpdateSnakeBody();
             }
-            
+
             // check if a snakeBodyPart is on the next point --> GameOver
             for (int i = 0; i < Points.Count - 2; i++)
             {
@@ -178,6 +180,8 @@ namespace Snake
                     GameOver();
                 }
             }
+            //Debug.Log(nextPoint.SideCoordinate.ToString());
+            CurrentSideCoordinate = nextPoint.SideCoordinate;
         }
 
         private void EatSnack()
@@ -205,19 +209,19 @@ namespace Snake
 
         private Vector3 CalculateKnotPosition(CubePoint point, DirectionOnCubeSide stepDirectionOnCubeSide)
         {
-            Vector3 positionInCube = point.SideCoordinate.GetPositionInCube(Cube.Dimension, Cube.Scale); 
+            Vector3 positionInCube = point.SideCoordinate.GetPositionInCube(Cube.Dimension, Cube.Scale);
             Quaternion rotationInCube = point.SideCoordinate.GetRotationInCube();
-            
+
             // position of the center of a field
             Vector3 positionInSide = point.FieldCoordinate.GetPositionInCubeSide(Cube.Scale);
-                        
+
             // move the position to the edge of the field, to which the snake moves
             positionInSide += (stepDirectionOnCubeSide switch
             {
-                DirectionOnCubeSide.negHor =>   new Vector3(-1, 0, 0)   * 0.5f * Cube.Scale,
-                DirectionOnCubeSide.posHor =>   new Vector3(1, 0, 0)    * 0.5f * Cube.Scale,
-                DirectionOnCubeSide.negVert =>  new Vector3(0, 0, -1)   * 0.5f * Cube.Scale,
-                DirectionOnCubeSide.posVert =>  new Vector3(0, 0, 1)    * 0.5f * Cube.Scale,
+                DirectionOnCubeSide.negHor => new Vector3(-1, 0, 0) * 0.5f * Cube.Scale,
+                DirectionOnCubeSide.posHor => new Vector3(1, 0, 0) * 0.5f * Cube.Scale,
+                DirectionOnCubeSide.negVert => new Vector3(0, 0, -1) * 0.5f * Cube.Scale,
+                DirectionOnCubeSide.posVert => new Vector3(0, 0, 1) * 0.5f * Cube.Scale,
                 _ => new Vector3(0, 0, 0)
             });
 
@@ -319,7 +323,7 @@ namespace Snake
             // set each bodypart to a specific percantage of the spline 
             //  - Tail and old BodyParts pause the animation
             //  - new BodyParts, Head, and EmptyGameObject move further
-            
+
             // Tail and old BodyParts
             for (int i = 0; i < BodyParts.Count - 4; i++)
             {
@@ -327,7 +331,7 @@ namespace Snake
                 bodyPartAnimate.StartOffset = i * (1.0f / (BodyParts.Count - 2));
                 bodyPartAnimate.Pause();
             }
-            
+
             // new BodyParts
             for (int i = BodyParts.Count - 4; i < BodyParts.Count - 2; i++)
             {
@@ -336,7 +340,7 @@ namespace Snake
                 bodyPartAnimate.NormalizedTime = (i - 2) * (1.0f / (BodyParts.Count - 2));
                 bodyPartAnimate.Play();
             }
-            
+
             // Head and EmptyGameObject
             for (int i = BodyParts.Count - 2; i < BodyParts.Count; i++)
             {
@@ -351,7 +355,7 @@ namespace Snake
             for (int i = 0; i < BodyParts.Count - 1; i++)
             {
                 SplineAnimate animate = BodyParts[i].GetComponent<SplineAnimate>();
-            
+
                 animate.StartOffset = i * (1.0f / BodyParts.Count);
                 animate.Pause();
             }
@@ -366,7 +370,7 @@ namespace Snake
             BodyParts.Add(Instantiate(SnakeTailPrefab));
 
             // Body (iterate doubled index for more density in the body)
-            for (int i = 1; i < (SplinePath.Spline.GetLength() * 2) - 3; i++) 
+            for (int i = 1; i < (SplinePath.Spline.GetLength() * 2) - 3; i++)
             {
                 BodyParts.Add(Instantiate(SnakeBodyPrefab));
             }
@@ -407,16 +411,16 @@ namespace Snake
             animate.Loop = SplineAnimate.LoopMode.Once;
             animate.AnimationMethod = SplineAnimate.Method.Speed;
             animate.MaxSpeed = Cube.Scale / StepInterval;
-            
+
             animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
-        
+
         private void GameOver()
         {
 
             StopSnake();
 
-            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Finde das BackgroundMusic-Skript im Spiel
+            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Searching for Background Music Script
             if (backgroundMusic != null)
             {
                 backgroundMusic.StopMusic();
