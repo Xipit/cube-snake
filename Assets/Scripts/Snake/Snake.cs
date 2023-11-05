@@ -180,7 +180,7 @@ namespace Snake
                     GameOver();
                 }
             }
-            //Debug.Log(nextPoint.SideCoordinate.ToString());
+            // Update Coordinate for SFX
             CurrentSideCoordinate = nextPoint.SideCoordinate;
         }
 

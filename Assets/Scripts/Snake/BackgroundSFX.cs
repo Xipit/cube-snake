@@ -5,14 +5,14 @@ using Snake;
 
 public class BackgroundSFX : MonoBehaviour
 {
-    public Snake.Snake snakeScript; // Verweis auf das Snake-Skript
+    public Snake.Snake snakeScript; // Reference to the Snake script
 
     private CubeSideCoordinate currentSideCoordinate;
     private string currentSide;
     private AudioSource currentAudioSource;
     private float lastSideChangeTime;
 
-    // Fügen Sie hier Ihre MP3-Audiodateien hinzu.
+    // Add MP3 audio files here.
     public AudioClip frontAudioClip;
     public AudioClip backAudioClip;
     public AudioClip rightAudioClip;
@@ -27,11 +27,11 @@ public class BackgroundSFX : MonoBehaviour
     private AudioSource upAudio;
     private AudioSource downAudio;
 
-    public float sideChangeTimeout = 3.0f; // Zeit in Sekunden bis zum Stoppen des Audios
+    public float sideChangeTimeout = 3.0f; // Time in seconds to stop the audio
 
     private void Start()
     {
-        // Führen Sie die Zuweisungen im Start-Methode durch.
+        // Perform assignments in the Start method.
         frontAudio = gameObject.AddComponent<AudioSource>();
         backAudio = gameObject.AddComponent<AudioSource>();
         rightAudio = gameObject.AddComponent<AudioSource>();
@@ -39,7 +39,7 @@ public class BackgroundSFX : MonoBehaviour
         upAudio = gameObject.AddComponent<AudioSource>();
         downAudio = gameObject.AddComponent<AudioSource>();
 
-        // Laden Sie die MP3-Dateien und weisen Sie sie den entsprechenden AudioSources zu.
+        // Load the MP3 files and assign them to the corresponding AudioSources.
         frontAudio.clip = frontAudioClip;
         backAudio.clip = backAudioClip;
         rightAudio.clip = rightAudioClip;
@@ -47,17 +47,17 @@ public class BackgroundSFX : MonoBehaviour
         upAudio.clip = upAudioClip;
         downAudio.clip = downAudioClip;
 
-        // Initialisieren Sie die aktuelle Audioquelle.
+        // Initialize the current audio source.
         currentAudioSource = frontAudio;
     }
 
     private void Update()
     {
-        // Aktualisieren Sie die Position der Schlange in jeder Frame.
+        // Update the snake's position in every frame.
         currentSideCoordinate = snakeScript.CurrentSideCoordinate;
         string newSide = currentSideCoordinate.ToString();
 
-        // Überprüfen Sie, ob sich die Seite geändert hat und das Audio nicht bereits abgespielt wird.
+        // Check if the side has changed and the audio is not already playing.
         if (newSide != currentSide)
         {
             StopCurrentAudio();
@@ -66,7 +66,7 @@ public class BackgroundSFX : MonoBehaviour
         }
         else
         {
-            // Überprüfen Sie, ob die Zeit seit der letzten Seitenänderung abgelaufen ist.
+            // Check if the time since the last side change has exceeded the timeout.
             if (Time.time - lastSideChangeTime > sideChangeTimeout)
             {
                 StopCurrentAudio();
@@ -77,7 +77,7 @@ public class BackgroundSFX : MonoBehaviour
 
     public void PlayAudioBySide(string side)
     {
-        // Spielen Sie das Audio abhängig von der Seite.
+        // Play the audio depending on the side.
         currentSide = side;
         switch (side)
         {
@@ -106,7 +106,7 @@ public class BackgroundSFX : MonoBehaviour
 
     private void StopCurrentAudio()
     {
-        // Stoppen Sie das aktuelle Audio.
+        // Stop the current audio.
         currentAudioSource.Stop();
     }
 }
