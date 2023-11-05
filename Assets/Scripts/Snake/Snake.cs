@@ -422,10 +422,17 @@ namespace Snake
 
         private void StopSnake()
         {
-            PauseSnake();
+            StopSnake();
 
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));
+
+            //audio
+            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Finde das BackgroundMusic-Skript im Spiel
+            if (backgroundMusic != null)
+            {
+                backgroundMusic.StopMusic();
+            }
         }
     }
 }

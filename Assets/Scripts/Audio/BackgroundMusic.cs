@@ -32,6 +32,14 @@ public class BackgroundMusic : MonoBehaviour
         }
     }
 
+    public void StopMusic()
+    {
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
