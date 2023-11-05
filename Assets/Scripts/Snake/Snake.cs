@@ -14,11 +14,13 @@ namespace Snake
         private List<CubePoint> Points;
         private Cube Cube;
 
+
         public SplineContainer SplinePath { get; private set; }
         public CubeSideCoordinate CurrentSideCoordinate { get; private set; }
 
 
         public float StepInterval;
+
 
         private InputDirection StepInputDirection;
         public InputDirection InputDirection;
@@ -183,6 +185,8 @@ namespace Snake
                     GameManager.Instance.GameOver();
                 }
             }
+            //Debug.Log(nextPoint.SideCoordinate.ToString());
+            CurrentSideCoordinate = nextPoint.SideCoordinate;
 
             RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
             // Update Coordinate for SFX
@@ -420,7 +424,7 @@ namespace Snake
             animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
 
-        private void StopSnake()
+        private void GameOver()
         {
             StopSnake();
 
@@ -428,7 +432,7 @@ namespace Snake
             CancelInvoke(nameof(UpdateSpline));
 
             //audio
-            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Finde das BackgroundMusic-Skript im Spiel
+            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Searching for Background Music Script
             if (backgroundMusic != null)
             {
                 backgroundMusic.StopMusic();
