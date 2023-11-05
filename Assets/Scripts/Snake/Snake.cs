@@ -413,8 +413,15 @@ namespace Snake
         
         private void GameOver()
         {
+
             StopSnake();
-            
+
+            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Finde das BackgroundMusic-Skript im Spiel
+            if (backgroundMusic != null)
+            {
+                backgroundMusic.StopMusic();
+            }
+
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));
         }
