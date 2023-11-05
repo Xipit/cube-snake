@@ -185,7 +185,7 @@ namespace Snake
                     GameManager.Instance.GameOver();
                 }
             }
-            //Debug.Log(nextPoint.SideCoordinate.ToString());
+            // Update Coordinate for SFX
             CurrentSideCoordinate = nextPoint.SideCoordinate;
 
             RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
