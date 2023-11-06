@@ -12,9 +12,11 @@ namespace Snake
     public class Snake : MonoBehaviour
     {
         private List<CubePoint> Points;
+        private List<CubePoint> TempPoints = new List<CubePoint>();
         private Cube Cube;
 
         public SplineContainer SplinePath { get; private set; }
+        public SplineContainer TempSplinePath { get; private set; }
 
         public float StepInterval;
 
@@ -35,7 +37,7 @@ namespace Snake
 
         private bool shouldGrowNextUpdate = false;
         private bool GoesThroughTunnel = false;
-        private int StepsInsideTunnel = 3;
+        private int StepsInsideTunnel = 1;
         private int StepsInsideTunnelCounter = 0;
         private Tunnel Tunnel;
         private CubePoint? TunnelEntry;
@@ -50,7 +52,9 @@ namespace Snake
         {
             this.Cube = cube;
             this.Snack = snack;
-            this.SplinePath = transform.GetComponent<SplineContainer>();
+            SplineContainer[] splineContainers = transform.GetComponents<SplineContainer>();
+            this.SplinePath = splineContainers[0];
+            this.TempSplinePath = splineContainers[1];
             this.Points = CreateStartPoints(cube, startSide);
 
             // stepInterval = 0.4 / 2 = 0.2
@@ -68,7 +72,7 @@ namespace Snake
             // This defines how the cube is rotated on the spawnSide, so that _Up_ Input matches _Up_ on the screen
             ReferenceDirectionForInput = DirectionOnCubeSide.posVert;
 
-            RotationManager.Instance.RotateToCubePoint(Points.Last(), Cube.Dimension);
+            RotationManager.Instance.RotateToCubePoint(GetSnakeHead(), Cube.Dimension);
 
             // Start Cycle of Update Methods
             InvokeRepeating(nameof(DetermineNextStepDirection), StepInterval * 0.75f, StepInterval);
@@ -148,7 +152,7 @@ namespace Snake
 
         private void VisualiseNextStepDirection()
         {
-            CubePoint snakeHead = Points.Last();
+            CubePoint snakeHead = GetSnakeHead();
 
             SplinePath.Spline.SetKnot(SplinePath.Spline.Count - 1, CalculateSplineKnot(snakeHead));
         }
@@ -195,13 +199,13 @@ namespace Snake
                 {
                     if (TunnelEntry.IsEqual(Tunnel.PointA))
                     {
-                        SplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointB));
-                        Points.Add(Tunnel.PointB);
+                        TempSplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointB));
+                        TempPoints.Add(Tunnel.PointB);
                     }
                     else if (TunnelEntry.IsEqual(Tunnel.PointB))
                     {
-                        SplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointA));
-                        Points.Add(Tunnel.PointA);
+                        TempSplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointA));
+                        TempPoints.Add(Tunnel.PointA);
                     }
 
                     GetReferenceDirectionForInputOnOppositeSide(TunnelEntry);
@@ -209,11 +213,6 @@ namespace Snake
                 // Everything between TunnelEntry and TunnelExit
                 else
                 {
-                    BezierKnot bezierKnot = new BezierKnot();
-                    bezierKnot.Position = Vector3.zero;
-                    bezierKnot.Rotation = Quaternion.identity;
-
-                    SplinePath.Spline.Add(bezierKnot);
                     Points.Add(TunnelEntry);
                 }
 
@@ -223,9 +222,13 @@ namespace Snake
             }
             else
             {
-                GoesThroughTunnel = false;
-                StepsInsideTunnelCounter = 0;
-                TunnelEntry = null;
+                if (GoesThroughTunnel)
+                {
+                    GoesThroughTunnel = false;
+                    TempSplinePath.Spline.Add(CalculateSplineKnot(TempPoints.Last()));
+                    StepsInsideTunnelCounter = 0;
+                    TunnelEntry = null;
+                }
 
                 if (ShouldMoveOverEdge)
                 {
@@ -233,8 +236,17 @@ namespace Snake
                     ReferenceDirectionForInput = TempReferenceDirectionForInput;
                 }
 
-                SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
-                Points.Add(nextPoint);
+                if (TempPoints.Count > 0)
+                {
+                    TempSplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
+                    TempPoints.Add(nextPoint);
+                }
+                else
+                {
+                    SplinePath.Spline.Add(CalculateSplineKnot(nextPoint));
+                    Points.Add(nextPoint);
+                }
+
 
                 if (ShouldGrowNextUpdate is false)
                 {
@@ -246,7 +258,15 @@ namespace Snake
                     ShouldGrowNextUpdate = false;
                 }
 
-                RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
+                if (Points.Count == 0)
+                {
+                    Points = TempPoints;
+                    SplinePath.Spline = TempSplinePath.Spline;
+                    TempPoints = new List<CubePoint>();
+                    TempSplinePath.Spline = new Spline();
+                }
+
+                RotationManager.Instance.RotateEveryStep(StepInputDirection, GetSnakeHead(), Cube.Dimension);
             }
 
 
@@ -269,6 +289,11 @@ namespace Snake
                     GameManager.Instance.GameOver();
                 }
             }
+        }
+
+        private CubePoint GetSnakeHead()
+        {
+            return TempPoints.Count > 0 ? TempPoints.Last() : Points.Last();
         }
 
         private void EatSnack()
@@ -295,13 +320,8 @@ namespace Snake
 
                 point = nextPoint;
                 direction = nextSide.neighborDirection;
-
-                //RotationManager.Instance.RotateOneSide(stepDirection, point, Cube.Dimension);
             }
 
-
-            // TODO need to look into this
-            Debug.Log("Rotate cube 180 degrees");
             RotationManager.Instance.RotateToOppositeSide(StepInputDirection);
         }
 
@@ -340,6 +360,10 @@ namespace Snake
                     DirectionOnCubeSide.posVert => new Vector3(0, 0, 1) * 0.5f * Cube.Scale,
                     _ => new Vector3(0, 0, 0)
                 });
+            }
+            else
+            {
+                positionInSide += new Vector3(0, -1, 0) * 0.5f * Cube.Scale;
             }
 
 
@@ -463,7 +487,7 @@ namespace Snake
 
         private CubePoint GetPointOnCubeInDirection(DirectionOnCubeSide direction)
         {
-            CubePoint snakeHead = Points.Last();
+            var snakeHead = GetSnakeHead();
 
             if (Cube.Sides[(int)snakeHead.SideCoordinate].Dimension.IsPointInDirectionInDimension(snakeHead, direction))
             {
@@ -488,13 +512,39 @@ namespace Snake
 
         private void UpdateSnakeBody()
         {
-            // set each bodypart to a specific percantage of the spline when updating the spline
-            for (int i = 0; i < BodyParts.Count; i++)
+            // Snake is going through tunnel --> there are two Lists of Points, where the Snake is located
+            // TempPoints & TempSpline --> Points after TunnelExit
+            if (TempPoints.Count > 0)
             {
-                SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
-                bodyPartAnimate.StartOffset = 0;
-                bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
-                bodyPartAnimate.Play();
+                int splinePathChangeCounter = 0;
+
+                // move last part to TempSpline
+                for (int i = BodyParts.Count - 1; i >= 0; i--)
+                {
+                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+
+                    if (bodyPartAnimate.Container == SplinePath && splinePathChangeCounter < 2)
+                    {
+                        bodyPartAnimate.Container = TempSplinePath;
+                        splinePathChangeCounter++;
+                    }
+
+                    bodyPartAnimate.StartOffset = 0;
+                    bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
+                    bodyPartAnimate.Play();
+                }
+            }
+            else
+            {
+                // set each bodypart to a specific percantage of the spline when updating the spline
+                for (int i = 0; i < BodyParts.Count; i++)
+                {
+                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                    bodyPartAnimate.Container = SplinePath;
+                    bodyPartAnimate.StartOffset = 0;
+                    bodyPartAnimate.NormalizedTime = i * (1.0f / BodyParts.Count);
+                    bodyPartAnimate.Play();
+                }
             }
         }
 
