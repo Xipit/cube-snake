@@ -14,10 +14,7 @@ namespace Snake
         private List<CubePoint> Points;
         private Cube Cube;
 
-
         public SplineContainer SplinePath { get; private set; }
-        public CubeSideCoordinate CurrentSideCoordinate { get; private set; }
-
 
         public float StepInterval;
 
@@ -59,8 +56,6 @@ namespace Snake
 
             RotationManager.Instance.RotateToCubePoint(Points.Last(), Cube.Dimension);
 
-            RotationManager.Instance.RotateToCubePoint(Points.Last(), Cube.Dimension);
-
             // Start Cycle of Update Methods
             InvokeRepeating(nameof(DetermineNextStepDirection), StepInterval * 0.75f, StepInterval);
             InvokeRepeating(nameof(UpdateSpline), StepInterval, StepInterval);
@@ -69,16 +64,6 @@ namespace Snake
             Snack.AssignNewPosition(Points.ToArray());
 
             GameAudioManager.Instance.SwitchCubeSide(startSide);
-        }
-
-        private void Update()
-        {
-            InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
-        }
-
-        private void Update()
-        {
-            InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
         }
 
         private void Update()
@@ -195,17 +180,10 @@ namespace Snake
                 if (nextPoint.IsEqual(Points[i]))
                 {
                     StopSnake();
-                    GameManager.Instance.StopSnake();
                     GameManager.Instance.GameOver();
                 }
             }
-            // Update Coordinate for SFX
-            CurrentSideCoordinate = nextPoint.SideCoordinate;
-
-            RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
-            // Update Coordinate for SFX
-            CurrentSideCoordinate = nextPoint.SideCoordinate;
-
+            
             RotationManager.Instance.RotateEveryStep(StepInputDirection, Points.Last(), Cube.Dimension);
         }
 
@@ -215,7 +193,7 @@ namespace Snake
             AddSnakeBodyPart();
             UpdateSnakeBodyAfterSnack();
             shouldGrowNextUpdate = true;
-            GameAudioManager.Instance.eatSnackAudioSource.Play();
+            GameAudioManager.Instance.EatSnackAudioSource.Play();
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -317,7 +295,7 @@ namespace Snake
             {
                 return snakeHead.GetPointOnSameSide(direction);
             }
-            else // snake moves across an edge // snake moves across an edge
+            else // snake moves across an edge 
             {
                 (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
                 snakeHead.SideCoordinate.GetNeighborWithDirection(direction);
@@ -325,7 +303,9 @@ namespace Snake
                 CubePoint nextPoint = snakeHead.GetPointOnNeighbour(direction, Cube);
 
                 ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
-                RotationReferenceManager.Instance.Rotate(StepInputDirection);
+                RotationManager.Instance.RotateOneSide(StepInputDirection, snakeHead, Cube.Dimension);
+
+                GameAudioManager.Instance.SwitchCubeSide(nextPoint.SideCoordinate);
 
                 return nextPoint;
             }
@@ -376,14 +356,12 @@ namespace Snake
         }
 
         private void PauseSnake()
-        private void PauseSnake()
         {
             for (int i = 0; i < BodyParts.Count - 1; i++)
             {
                 SplineAnimate animate = BodyParts[i].GetComponent<SplineAnimate>();
 
                 animate.StartOffset = i * (1.0f / BodyParts.Count);
-                animate.MaxSpeed = 0; // Pause
                 animate.MaxSpeed = 0; // Pause
             }
         }
@@ -442,9 +420,9 @@ namespace Snake
             animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
 
-        private void GameOver()
+        private void StopSnake()
         {
-            StopSnake();
+            PauseSnake();
 
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));

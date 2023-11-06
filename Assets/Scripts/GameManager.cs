@@ -8,9 +8,9 @@ using UnityEngine;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
-    public GameMode Mode;
-
     public static GameManager Instance { get; private set; }
+
+    public GameMode Mode;
 
 
     public void SetGameMode(GameMode mode)

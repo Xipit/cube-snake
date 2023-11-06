@@ -1087,15 +1087,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58a11b02aef309344a7ff2ca0b507e43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eatSnackAudioSource: {fileID: 1898572329}
-  gameOverAudioSource: {fileID: 1898572328}
-  backgroundAudioSource: {fileID: 1898572327}
-  frontAudioClip: {fileID: 8300000, guid: e79d5e386d6b6504d996897274156e8a, type: 3}
-  backAudioClip: {fileID: 8300000, guid: 87f4cdd2bf1c00643bafe1a3c9054380, type: 3}
-  rightAudioClip: {fileID: 8300000, guid: 475f47f84e2102c4999108a254322fee, type: 3}
-  leftAudioClip: {fileID: 8300000, guid: bd7ddf10c54c3274e9ff32e0db5eda56, type: 3}
-  upAudioClip: {fileID: 8300000, guid: 310b77d5d0baea34a92c90211fc9837b, type: 3}
-  downAudioClip: {fileID: 8300000, guid: 03bcf68d9a5673e468f8061378564478, type: 3}
+  EatSnackAudioSource: {fileID: 0}
+  GameOverAudioSource: {fileID: 0}
+  BackgroundAudioSource: {fileID: 0}
+  FrontAudioClip: {fileID: 0}
+  BackAudioClip: {fileID: 0}
+  RightAudioClip: {fileID: 0}
+  LeftAudioClip: {fileID: 0}
+  UpAudioClip: {fileID: 0}
+  DownAudioClip: {fileID: 0}
 --- !u!4 &1898572331
 Transform:
   m_ObjectHideFlags: 0
@@ -1195,11 +1195,6 @@ SceneRoots:
   - {fileID: 663610168}
   - {fileID: 1535876280}
   - {fileID: 1577610163}
-  - {fileID: 330585546}
-  - {fileID: 410087041}
-  - {fileID: 832575519}
-  - {fileID: 910736503}
-  - {fileID: 2008436922}
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}

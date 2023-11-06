@@ -5,35 +5,35 @@ public class GameAudioManager : MonoBehaviour
     public static GameAudioManager Instance { get; private set; }
 
     [Header("General Audio")]
-    public AudioSource eatSnackAudioSource;
-    public AudioSource gameOverAudioSource;
+    public AudioSource EatSnackAudioSource;
+    public AudioSource GameOverAudioSource;
 
     [Header("Music Audio")]
-    public AudioSource backgroundAudioSource;
+    public AudioSource BackgroundAudioSource;
 
     // Backgroundmusic specific for every CubeSide
-    public AudioClip frontAudioClip;
-    public AudioClip backAudioClip;
-    public AudioClip rightAudioClip;
-    public AudioClip leftAudioClip;
-    public AudioClip upAudioClip;
-    public AudioClip downAudioClip;
+    public AudioClip FrontAudioClip;
+    public AudioClip BackAudioClip;
+    public AudioClip RightAudioClip;
+    public AudioClip LeftAudioClip;
+    public AudioClip UpAudioClip;
+    public AudioClip DownAudioClip;
 
-    private AudioSource currentAudioSource;
-    private AudioSource lastSideAudioSource;
+    private AudioSource CurrentAudioSource;
+    private AudioSource LastSideAudioSource;
 
     private void Start()
     {
-        backgroundAudioSource.Play();
+        BackgroundAudioSource.Play();
 
-        currentAudioSource = gameObject.AddComponent<AudioSource>();
-        lastSideAudioSource = gameObject.AddComponent<AudioSource>();
+        CurrentAudioSource = gameObject.AddComponent<AudioSource>();
+        LastSideAudioSource = gameObject.AddComponent<AudioSource>();
     }
 
     public void GameOver()
     {
-        backgroundAudioSource.Stop();
-        gameOverAudioSource.Play();
+        BackgroundAudioSource.Stop();
+        GameOverAudioSource.Play();
     }
 
     public void SwitchCubeSide(CubeSideCoordinate cubeSide)
@@ -41,27 +41,27 @@ public class GameAudioManager : MonoBehaviour
         switch (cubeSide)
         {
             case CubeSideCoordinate.Front:
-                SetNewAudioClipAndFadeIn(frontAudioClip);
+                SetNewAudioClipAndFadeIn(FrontAudioClip);
                 break;
 
             case CubeSideCoordinate.Back:
-                SetNewAudioClipAndFadeIn(backAudioClip);
+                SetNewAudioClipAndFadeIn(BackAudioClip);
                 break;
 
             case CubeSideCoordinate.Right:
-                SetNewAudioClipAndFadeIn(rightAudioClip);
+                SetNewAudioClipAndFadeIn(RightAudioClip);
                 break;
 
             case CubeSideCoordinate.Left:
-                SetNewAudioClipAndFadeIn(leftAudioClip);
+                SetNewAudioClipAndFadeIn(LeftAudioClip);
                 break;
 
             case CubeSideCoordinate.Up:
-                SetNewAudioClipAndFadeIn(upAudioClip);
+                SetNewAudioClipAndFadeIn(UpAudioClip);
                 break;
 
             case CubeSideCoordinate.Down:
-                SetNewAudioClipAndFadeIn(downAudioClip);
+                SetNewAudioClipAndFadeIn(DownAudioClip);
                 break;
 
             default:
@@ -69,20 +69,25 @@ public class GameAudioManager : MonoBehaviour
         }
     }
 
-    public void SetNewAudioClipAndFadeIn(AudioClip newCubeSideAudioClip)
+    private void SetNewAudioClipAndFadeIn(AudioClip newCubeSideAudioClip)
     {
-        lastSideAudioSource.clip = currentAudioSource.clip;
-        currentAudioSource.clip = newCubeSideAudioClip;
+        if (CurrentAudioSource.clip == null)
+        {
+            CurrentAudioSource.clip = newCubeSideAudioClip;
+        }
 
-        lastSideAudioSource.Play();
-        currentAudioSource.Play();
+        LastSideAudioSource.clip = CurrentAudioSource.clip;
+        CurrentAudioSource.clip = newCubeSideAudioClip;
+
+        LastSideAudioSource.Play();
+        CurrentAudioSource.Play();
 
         // fade in and out
-        currentAudioSource.volume = 0;
-        StartCoroutine(AudioHelper.StartFade(currentAudioSource, 1, 1));
+        CurrentAudioSource.volume = 0;
+        StartCoroutine(AudioHelper.StartFade(CurrentAudioSource, 1, 1));
 
-        lastSideAudioSource.volume = 1;
-        StartCoroutine(AudioHelper.StartFade(lastSideAudioSource, 1, 0));
+        LastSideAudioSource.volume = 1;
+        StartCoroutine(AudioHelper.StartFade(LastSideAudioSource, 1, 0));
     }
 
     private void Awake()
