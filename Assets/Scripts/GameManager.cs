@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        AudioManager.Instance.GameOver();
+        GameAudioManager.Instance.GameOver();
     }
 
     public void Start()

@@ -66,7 +66,7 @@ namespace Snake
             // Set first Snack on Cube
             Snack.AssignNewPosition(Points.ToArray());
 
-            AudioManager.Instance.SwitchCubeSide(startSide);
+            GameAudioManager.Instance.SwitchCubeSide(startSide);
         }
 
         private void Update()
@@ -200,7 +200,7 @@ namespace Snake
             AddSnakeBodyPart();
             UpdateSnakeBodyAfterSnack();
             shouldGrowNextUpdate = true;
-            AudioManager.Instance.eatSnackAudioSource.Play();
+            GameAudioManager.Instance.eatSnackAudioSource.Play();
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -312,7 +312,7 @@ namespace Snake
                 ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
                 RotationManager.Instance.RotateOneSide(StepInputDirection, snakeHead, Cube.Dimension);
 
-                AudioManager.Instance.SwitchCubeSide(nextPoint.SideCoordinate);
+                GameAudioManager.Instance.SwitchCubeSide(nextPoint.SideCoordinate);
 
                 return nextPoint;
             }

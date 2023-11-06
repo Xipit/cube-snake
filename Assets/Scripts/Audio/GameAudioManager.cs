@@ -1,13 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Snake;
 
-public class BackgroundSFX : MonoBehaviour
+public class GameAudioManager : MonoBehaviour
 {
-    public Snake.Snake snakeScript; // Reference to the Snake script
+    public static GameAudioManager Instance { get; private set; }
 
-    // Add MP3 audio files here.
+    [Header("General Audio")]
+    public AudioSource eatSnackAudioSource;
+    public AudioSource gameOverAudioSource;
+
+    [Header("Music Audio")]
+    public AudioSource backgroundAudioSource;
+
+    // Backgroundmusic specific for every CubeSide
     public AudioClip frontAudioClip;
     public AudioClip backAudioClip;
     public AudioClip rightAudioClip;
@@ -17,17 +21,19 @@ public class BackgroundSFX : MonoBehaviour
 
     private AudioSource currentAudioSource;
     private AudioSource lastSideAudioSource;
-    
-
-    public float sideChangeTimeout = 3.0f; // Time in seconds to stop the audio
 
     private void Start()
     {
+        backgroundAudioSource.Play();
+
         currentAudioSource = gameObject.AddComponent<AudioSource>();
         lastSideAudioSource = gameObject.AddComponent<AudioSource>();
+    }
 
-        currentAudioSource.Play();
-        lastSideAudioSource.Play();
+    public void GameOver()
+    {
+        backgroundAudioSource.Stop();
+        gameOverAudioSource.Play();
     }
 
     public void SwitchCubeSide(CubeSideCoordinate cubeSide)
@@ -68,11 +74,28 @@ public class BackgroundSFX : MonoBehaviour
         lastSideAudioSource.clip = currentAudioSource.clip;
         currentAudioSource.clip = newCubeSideAudioClip;
 
+        lastSideAudioSource.Play();
+        currentAudioSource.Play();
+
         // fade in and out
         currentAudioSource.volume = 0;
-        StartCoroutine(AudioHelper.StartFade(currentAudioSource, 1000, 1));
+        StartCoroutine(AudioHelper.StartFade(currentAudioSource, 1, 1));
 
         lastSideAudioSource.volume = 1;
-        StartCoroutine(AudioHelper.StartFade(lastSideAudioSource, 1000, 0));
+        StartCoroutine(AudioHelper.StartFade(lastSideAudioSource, 1, 0));
+    }
+
+    private void Awake()
+    {
+        // If there is an instance, and it's not me, delete myself.
+
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
     }
 }
