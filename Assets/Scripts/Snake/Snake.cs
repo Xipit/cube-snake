@@ -65,6 +65,8 @@ namespace Snake
 
             // Set first Snack on Cube
             Snack.AssignNewPosition(Points.ToArray());
+
+            AudioManager.Instance.SwitchCubeSide(startSide);
         }
 
         private void Update()
@@ -180,7 +182,6 @@ namespace Snake
             {
                 if (nextPoint.IsEqual(Points[i]))
                 {
-                    GetComponent<GameOver>().OnGameOver();
                     StopSnake();
                     GameManager.Instance.GameOver();
                 }
@@ -199,7 +200,7 @@ namespace Snake
             AddSnakeBodyPart();
             UpdateSnakeBodyAfterSnack();
             shouldGrowNextUpdate = true;
-            GetComponent<SnackEating>().OnSnackEaten();
+            AudioManager.Instance.eatSnackAudioSource.Play();
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -310,6 +311,8 @@ namespace Snake
 
                 ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
                 RotationManager.Instance.RotateOneSide(StepInputDirection, snakeHead, Cube.Dimension);
+
+                AudioManager.Instance.SwitchCubeSide(nextPoint.SideCoordinate);
 
                 return nextPoint;
             }
@@ -424,19 +427,12 @@ namespace Snake
             animate.StartOffset = index * (1.0f / BodyParts.Count);
         }
 
-        private void GameOver()
+        private void StopSnake()
         {
-            StopSnake();
+            PauseSnake();
 
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSpline));
-
-            //audio
-            BackgroundMusic backgroundMusic = FindObjectOfType<BackgroundMusic>(); // Searching for Background Music Script
-            if (backgroundMusic != null)
-            {
-                backgroundMusic.StopMusic();
-            }
         }
     }
 }
