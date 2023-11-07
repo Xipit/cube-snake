@@ -110,4 +110,41 @@ public class CubePoint
     {
         return this.SideCoordinate.ToString() + ": " + this.FieldCoordinate.ToString();
     }
+
+    public bool IsAlreadyInSnake(List<CubePoint> points, List<CubePoint> tempPoints)
+    {
+        // check if a snakeBodyPart is on the next point (TempPoints) --> GameOver
+        if (tempPoints.Count > 1)
+        {
+            for (int i = 0; i < tempPoints.Count - 2; i++)
+            {
+                if (IsEqual(tempPoints[i]))
+                {
+                    return true;
+                }
+            }
+                
+            // check if a snakeBodyPart is on the next point (Points) --> GameOver
+            for (int i = 0; i < points.Count ; i++)
+            {
+                if (IsEqual(points[i]))
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            // check if a snakeBodyPart is on the next point (Points) --> GameOver
+            for (int i = 0; i < points.Count - 2; i++)
+            {
+                if (IsEqual(points[i]))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
