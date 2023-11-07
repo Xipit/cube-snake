@@ -209,16 +209,9 @@ namespace Snake
                 // TunnelExit
                 else if (StepsInsideTunnelCounter == StepsInsideTunnel)
                 {
-                    if (TunnelEntry.IsEqual(Tunnel.PointA))
-                    {
-                        TempSplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointB));
-                        TempPoints.Add(Tunnel.PointB);
-                    }
-                    else if (TunnelEntry.IsEqual(Tunnel.PointB))
-                    {
-                        TempSplinePath.Spline.Add(CalculateSplineKnot(Tunnel.PointA));
-                        TempPoints.Add(Tunnel.PointA);
-                    }
+                    TempSplinePath.Spline.Add(CalculateSplineKnot(Tunnel.GetExitCubePoint(TunnelEntry)));
+                    TempPoints.Add(Tunnel.GetExitCubePoint(TunnelEntry));
+
 
                     GetReferenceDirectionForInputOnOppositeSide(TunnelEntry);
                     GoesThroughTunnel = false;
@@ -257,7 +250,11 @@ namespace Snake
 
                 if (ShouldGrowNextUpdate is false)
                 {
-                    SplinePath.Spline.RemoveAt(0);
+                    // After being in the tunnel it is possible, that the splinePath contains less elements than Points
+                    if (SplinePath.Spline.Count > 0)
+                    {
+                        SplinePath.Spline.RemoveAt(0);
+                    }
                     Points.RemoveAt(0);
                 }
                 else
@@ -287,8 +284,7 @@ namespace Snake
                 UpdateSnakeBody();
             }
 
-            //CheckGameOver(nextPoint);
-            if (nextPoint.IsAlreadyInSnake(Points, TempPoints))
+            if (nextPoint.IsEqualToPointInLists(Points, TempPoints))
             {
                 StopSnake();
                 GameManager.Instance.GameOver();
@@ -358,10 +354,10 @@ namespace Snake
             {
                 positionInSide += (stepDirectionOnCubeSide switch
                 {
-                    DirectionOnCubeSide.negHor => new Vector3(-1, 1, 0) * 0.5f * Cube.Scale,
-                    DirectionOnCubeSide.posHor => new Vector3(1, 1, 0) * 0.5f * Cube.Scale,
-                    DirectionOnCubeSide.negVert => new Vector3(0, 1, -1) * 0.5f * Cube.Scale,
-                    DirectionOnCubeSide.posVert => new Vector3(0, 1, 1) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.negHor => new Vector3(-1, 0, 0) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.posHor => new Vector3(1, 0, 0) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.negVert => new Vector3(0, 0, -1) * 0.5f * Cube.Scale,
+                    DirectionOnCubeSide.posVert => new Vector3(0, 0, 1) * 0.5f * Cube.Scale,
                     _ => new Vector3(0, 0, 0)
                 });
             }
@@ -541,7 +537,7 @@ namespace Snake
                     }
                 }
 
-                int c = 0;
+                int j = 0;
                 for (int i = 0; i < BodyParts.Count; i++)
                 {
                     SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
@@ -553,8 +549,8 @@ namespace Snake
                     }
                     else
                     {
-                        bodyPartAnimate.NormalizedTime = c * (1.0f / bodyPartsOnTempSplinePath);
-                        c++;
+                        bodyPartAnimate.NormalizedTime = j * (1.0f / bodyPartsOnTempSplinePath);
+                        j++;
                     }
 
                     bodyPartAnimate.Play();

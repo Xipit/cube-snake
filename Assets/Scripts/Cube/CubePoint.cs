@@ -111,7 +111,7 @@ public class CubePoint
         return this.SideCoordinate.ToString() + ": " + this.FieldCoordinate.ToString();
     }
 
-    public bool IsAlreadyInSnake(List<CubePoint> points, List<CubePoint> tempPoints)
+    public bool IsEqualToPointInLists(List<CubePoint> points, List<CubePoint> tempPoints)
     {
         // check if a snakeBodyPart is on the next point (TempPoints) --> GameOver
         if (tempPoints.Count > 1)
