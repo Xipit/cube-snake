@@ -514,7 +514,7 @@ namespace Snake
         {
             // Snake is going through tunnel --> there are two Lists of Points, where the Snake is located
             // TempPoints & TempSpline --> Points after TunnelExit
-            if (TempPoints.Count > 0)
+            /*if (TempPoints.Count > 0)
             {
                 int splinePathChangeCounter = 0;
 
@@ -555,6 +555,33 @@ namespace Snake
 
                     bodyPartAnimate.Play();
                 }
+            }*/
+
+            if (GoesThroughTunnel)
+            {
+                // TODO find the right value
+                int movingBodyPartsCount = BodyParts.Count - (StepsInsideTunnelCounter);
+                
+                for (int i = (BodyParts.Count - 1); i >= movingBodyPartsCount; i--)
+                {
+                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                    bodyPartAnimate.Container = SplinePath;
+                    bodyPartAnimate.StartOffset = 1f;
+                    bodyPartAnimate.NormalizedTime = 0f;
+                    bodyPartAnimate.Pause();
+                }
+
+                for (int i = 0; i < movingBodyPartsCount; i++)
+                {
+                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                    bodyPartAnimate.Container = SplinePath;
+                    bodyPartAnimate.StartOffset = 0;
+                    bodyPartAnimate.NormalizedTime = i * (1.0f / movingBodyPartsCount);
+                    bodyPartAnimate.Play();
+                }
+                
+                
+                // TODO add GameObjects to TempSplinePath
             }
             else
             {
