@@ -655,7 +655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9a86fb6d99f374cb8bcf4cd7731e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StepInterval: 0.6
+  StepInterval: 0.4
   InputDirection: 1
   SnakeHeadPrefab: {fileID: 4724607537548666143, guid: 895ef99b8f5cf425cb4034ff83162567,
     type: 3}

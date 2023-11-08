@@ -11,7 +11,9 @@ namespace Snake
 {
     public class Snake : MonoBehaviour
     {
+        // Points is used for storing the cubePoints of the snake before going into a tunnel (same for SplinePath)
         private List<CubePoint> Points;
+        // TempPoints is used if the snake comes out of the tunnel. It is used as long there is at least one cubePoint left in Points (same for TempSplinePath)
         private List<CubePoint> TempPoints = new List<CubePoint>();
         private Cube Cube;
 
@@ -35,7 +37,8 @@ namespace Snake
 
         private Snack Snack;
 
-        private bool shouldGrowNextUpdate = false;
+        private bool ShouldGrowNextUpdate = false;
+
         private bool GoesThroughTunnel = false;
         private int StepsInsideTunnel = 3;
         private int StepsInsideTunnelCounter = 0;
@@ -193,10 +196,12 @@ namespace Snake
 
             if (GoesThroughTunnel && TunnelEntry != null)
             {
-                // Add new knot to Spline && new Point to Points
+                // is called if the snakeHead is in a tunnel
+
                 // TunnelEntry
                 if (StepsInsideTunnelCounter == 0)
                 {
+                    // move over edge if the tunnelEntry is on the next cubeSide
                     if (ShouldMoveOverEdge)
                     {
                         RotationManager.Instance.RotateOneSide(StepInputDirection, nextPoint, Cube.Dimension);
@@ -209,20 +214,32 @@ namespace Snake
                 // TunnelExit
                 else if (StepsInsideTunnelCounter == StepsInsideTunnel)
                 {
-                    TempSplinePath.Spline.Add(CalculateSplineKnot(Tunnel.GetExitCubePoint(TunnelEntry)));
-                    TempPoints.Add(Tunnel.GetExitCubePoint(TunnelEntry));
+                    CubePoint tunnelExit = Tunnel.GetExitCubePoint(TunnelEntry);
+                    // Knot is in the inside of the cube behind the tunnelExit
+                    TempSplinePath.Spline.Add(CalculateSplineKnot(tunnelExit));
+                    TempPoints.Add(tunnelExit);
 
+                    UpdateReferenceDirectionForInputOnOppositeSide(TunnelEntry);
 
-                    GetReferenceDirectionForInputOnOppositeSide(TunnelEntry);
                     GoesThroughTunnel = false;
-                    TempSplinePath.Spline.Add(CalculateSplineKnot(TempPoints.Last()));
+                    // Knot is located on the outside of the cube at the tunnelExit (GoesThroughTunnel needs to be false here)
+                    TempSplinePath.Spline.Add(CalculateSplineKnot(tunnelExit));
+
                     StepsInsideTunnelCounter = 0;
                     TunnelEntry = null;
+
+                    RotationManager.Instance.RotateToOppositeSide(StepInputDirection);
                 }
                 // Everything between TunnelEntry and TunnelExit
                 else
                 {
+                    // needs to added to Points, so we do decrease the length of the snake (the length depends on the length of Points)
                     Points.Add(TunnelEntry);
+                    if (StepsInsideTunnelCounter == 1)
+                    {
+                        // add one more knot inside the tunnel to store gameObjects before changing their splineContainer to TempSplinePath
+                        SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry));
+                    }
                 }
 
                 StepsInsideTunnelCounter++;
@@ -231,6 +248,8 @@ namespace Snake
             }
             else
             {
+                // is called if the snakeHead is not in a tunnel
+
                 if (ShouldMoveOverEdge)
                 {
                     RotationManager.Instance.RotateOneSide(StepInputDirection, nextPoint, Cube.Dimension);
@@ -264,6 +283,7 @@ namespace Snake
 
                 if (Points.Count == 0)
                 {
+                    // the snake is fully moved through the tunnel --> TempPoints no longer needs to be used
                     Points = TempPoints;
                     SplinePath.Spline = TempSplinePath.Spline;
                     TempPoints = new List<CubePoint>();
@@ -305,7 +325,7 @@ namespace Snake
             ShouldGrowNextUpdate = true;
         }
 
-        private void GetReferenceDirectionForInputOnOppositeSide(CubePoint point)
+        private void UpdateReferenceDirectionForInputOnOppositeSide(CubePoint point)
         {
             DirectionOnCubeSide direction = StepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
 
@@ -321,8 +341,6 @@ namespace Snake
                 point = nextPoint;
                 direction = nextSide.neighborDirection;
             }
-
-            RotationManager.Instance.RotateToOppositeSide(StepInputDirection);
         }
 
         private BezierKnot CalculateSplineKnot(CubePoint cubePoint)
@@ -363,7 +381,15 @@ namespace Snake
             }
             else
             {
-                positionInSide += new Vector3(0, -1, 0) * 0.5f * Cube.Scale;
+                if (StepsInsideTunnelCounter == 1)
+                {
+                    // position of this knot is deep inside of the tunnel (it needs to be there so we can store the gameObjects before changing their splineContainer to TempSplinePath
+                    positionInSide += new Vector3(0, -2, 0) * 0.5f * Cube.Scale;
+                }
+                else
+                {
+                    positionInSide += new Vector3(0, -1, 0) * 0.5f * Cube.Scale;
+                }
             }
 
 
@@ -512,22 +538,50 @@ namespace Snake
 
         private void UpdateSnakeBody()
         {
-            // Snake is going through tunnel --> there are two Lists of Points, where the Snake is located
-            // TempPoints & TempSpline --> Points after TunnelExit
-            /*if (TempPoints.Count > 0)
-            {
-                int splinePathChangeCounter = 0;
+            // Points & SplinePath --> Points and Knots before going into the Tunnel
+            // TempPoints & TempSplinePath --> Points and Knots after coming out of the TunnelExit
 
+            if (GoesThroughTunnel && StepsInsideTunnelCounter > 1)
+            {
+                int movingBodyPartsCount = BodyParts.Count - (StepsInsideTunnelCounter - 2);
+
+                // stop the gameObjects which are moved into the cube through the tunnelEntry
+                for (int i = (BodyParts.Count - 1); i >= movingBodyPartsCount; i--)
+                {
+                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                    bodyPartAnimate.Container = SplinePath;
+                    bodyPartAnimate.StartOffset = 1f;
+                    bodyPartAnimate.NormalizedTime = 0f;
+                    bodyPartAnimate.Pause();
+                }
+
+                // keep the gameObject animates which are still moving towards the tunnelEntry
+                for (int i = 0; i < movingBodyPartsCount; i++)
+                {
+                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
+                    bodyPartAnimate.Container = SplinePath;
+                    bodyPartAnimate.StartOffset = 0;
+                    bodyPartAnimate.NormalizedTime = i * (1.0f / movingBodyPartsCount);
+                    bodyPartAnimate.Play();
+                }
+
+            }
+            else if (TempPoints.Count > 0)
+            {
+                // a part of the snake came through the tunnelExit and is now moving on the cube again
+
+                int containerChangedCounter = 0;
                 int bodyPartsOnTempSplinePath = 0;
+
                 for (int i = BodyParts.Count - 1; i >= 0; i--)
                 {
                     SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
 
-                    // move last part to TempSpline
-                    if (bodyPartAnimate.Container == SplinePath && splinePathChangeCounter < 2)
+                    // move last part of the Snake to TempSplinePath
+                    if (bodyPartAnimate.Container == SplinePath && containerChangedCounter < 2)
                     {
                         bodyPartAnimate.Container = TempSplinePath;
-                        splinePathChangeCounter++;
+                        containerChangedCounter++;
                     }
 
                     // count how many BodyParts are placed on the TempSplinePath
@@ -537,7 +591,8 @@ namespace Snake
                     }
                 }
 
-                int j = 0;
+                // animate the gameObjects on both splinePaths
+                int k = 0;
                 for (int i = 0; i < BodyParts.Count; i++)
                 {
                     SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
@@ -549,39 +604,12 @@ namespace Snake
                     }
                     else
                     {
-                        bodyPartAnimate.NormalizedTime = j * (1.0f / bodyPartsOnTempSplinePath);
-                        j++;
+                        bodyPartAnimate.NormalizedTime = k * (1.0f / bodyPartsOnTempSplinePath);
+                        k++;
                     }
 
                     bodyPartAnimate.Play();
                 }
-            }*/
-
-            if (GoesThroughTunnel)
-            {
-                // TODO find the right value
-                int movingBodyPartsCount = BodyParts.Count - (StepsInsideTunnelCounter);
-                
-                for (int i = (BodyParts.Count - 1); i >= movingBodyPartsCount; i--)
-                {
-                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
-                    bodyPartAnimate.Container = SplinePath;
-                    bodyPartAnimate.StartOffset = 1f;
-                    bodyPartAnimate.NormalizedTime = 0f;
-                    bodyPartAnimate.Pause();
-                }
-
-                for (int i = 0; i < movingBodyPartsCount; i++)
-                {
-                    SplineAnimate bodyPartAnimate = BodyParts[i].GetComponent<SplineAnimate>();
-                    bodyPartAnimate.Container = SplinePath;
-                    bodyPartAnimate.StartOffset = 0;
-                    bodyPartAnimate.NormalizedTime = i * (1.0f / movingBodyPartsCount);
-                    bodyPartAnimate.Play();
-                }
-                
-                
-                // TODO add GameObjects to TempSplinePath
             }
             else
             {
