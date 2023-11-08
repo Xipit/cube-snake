@@ -210,6 +210,8 @@ namespace Snake
 
                     SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry));
                     Points.Add(TunnelEntry);
+                    
+                    StepsInsideTunnelCounter++;
                 }
                 // TunnelExit
                 else if (StepsInsideTunnelCounter == StepsInsideTunnel)
@@ -235,14 +237,16 @@ namespace Snake
                 {
                     // needs to added to Points, so we do decrease the length of the snake (the length depends on the length of Points)
                     Points.Add(TunnelEntry);
+                    
                     if (StepsInsideTunnelCounter == 1)
                     {
                         // add one more knot inside the tunnel to store gameObjects before changing their splineContainer to TempSplinePath
                         SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry));
                     }
+                    
+                    StepsInsideTunnelCounter++;
                 }
-
-                StepsInsideTunnelCounter++;
+                
                 SplinePath.Spline.RemoveAt(0);
                 Points.RemoveAt(0);
             }
@@ -286,6 +290,7 @@ namespace Snake
                     // the snake is fully moved through the tunnel --> TempPoints no longer needs to be used
                     Points = TempPoints;
                     SplinePath.Spline = TempSplinePath.Spline;
+                    
                     TempPoints = new List<CubePoint>();
                     TempSplinePath.Spline = new Spline();
                 }
