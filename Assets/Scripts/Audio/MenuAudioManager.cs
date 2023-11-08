@@ -1,9 +1,9 @@
 using UnityEngine;
 
 
-public class AudioManager : MonoBehaviour
+public class MenuAudioManager : MonoBehaviour
 {
-    private static AudioManager instance;
+    private static MenuAudioManager instance;
 
     void Awake()
     {

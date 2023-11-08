@@ -33,4 +33,12 @@ public class GameMode : ScriptableObject
     /// <br/> If [sidesAreUnique] is false, then the style of a random side will be applied to all sides.
     /// </summary>
     public bool sidesAreUnique = true;
+
+    public void Set(GameMode mode)
+    {
+        dimensionsAreRandom = mode.dimensionsAreRandom;
+        cubeIsSquare = mode.cubeIsSquare;
+        dimension = mode.dimension;
+        sidesAreUnique = mode.sidesAreUnique;
+    }
 }

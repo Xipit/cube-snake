@@ -474,7 +474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c90936e2ff6b4f808f32e7dbca26e3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Mode: {fileID: 11400000, guid: d7ee1947eea0f4d81a30bd5435de9495, type: 2}
+  Mode: {fileID: 11400000, guid: 086aa8d741ee240799700ae4e9cc1bcc, type: 2}
 --- !u!4 &669610444
 Transform:
   m_ObjectHideFlags: 0
@@ -1087,15 +1087,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58a11b02aef309344a7ff2ca0b507e43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EatSnackAudioSource: {fileID: 0}
-  GameOverAudioSource: {fileID: 0}
-  BackgroundAudioSource: {fileID: 0}
-  FrontAudioClip: {fileID: 0}
-  BackAudioClip: {fileID: 0}
-  RightAudioClip: {fileID: 0}
-  LeftAudioClip: {fileID: 0}
-  UpAudioClip: {fileID: 0}
-  DownAudioClip: {fileID: 0}
+  EatSnackAudioSource: {fileID: 1898572329}
+  GameOverAudioSource: {fileID: 1898572328}
+  BackgroundAudioSource: {fileID: 1898572327}
+  FrontAudioClip: {fileID: 8300000, guid: e79d5e386d6b6504d996897274156e8a, type: 3}
+  BackAudioClip: {fileID: 8300000, guid: 03bcf68d9a5673e468f8061378564478, type: 3}
+  RightAudioClip: {fileID: 8300000, guid: bd7ddf10c54c3274e9ff32e0db5eda56, type: 3}
+  LeftAudioClip: {fileID: 8300000, guid: 475f47f84e2102c4999108a254322fee, type: 3}
+  UpAudioClip: {fileID: 8300000, guid: 310b77d5d0baea34a92c90211fc9837b, type: 3}
+  DownAudioClip: {fileID: 8300000, guid: 03de1b894f39cce4ca6cc05b98f4a1f4, type: 3}
 --- !u!4 &1898572331
 Transform:
   m_ObjectHideFlags: 0

@@ -9,6 +9,9 @@ using UnityEditor;
 /// </summary>
 public class Dimension3D 
 {
+    public static int MAX = 50;
+    public static int MIN = 3;
+
     public int X { get; }
     public int Y { get; }
     public int Z { get; }
@@ -24,10 +27,10 @@ public class Dimension3D
 
     public Dimension3D(int x, int y, int z)
     {
-        // ensure all dimensions are above 3
-        this.X = Mathf.Max(3, x);
-        this.Y = Mathf.Max(3, y);
-        this.Z = Mathf.Max(3, z);
+        // ensure all dimensions are above min
+        this.X = Mathf.Clamp(x, MIN, MAX);
+        this.Y = Mathf.Clamp(y, MIN, MAX);
+        this.Z = Mathf.Clamp(z, MIN, MAX);
     }
 
     public Dimension3D(float x, float y, float z) : this((int)x, (int)y, (int)z) { }
