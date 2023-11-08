@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class SoundSettings : MonoBehaviour
 {
-    [SerializeField] Slider soundSlider;
+    [SerializeField] Slider Slider_Volume;
     [SerializeField] AudioMixer masterMixer;
 
     private void Start()
@@ -26,10 +26,10 @@ public class SoundSettings : MonoBehaviour
 
     public void SetVolumeFromSlider()
     {
-        SetVolume(soundSlider.value);
+        SetVolume(Slider_Volume.value);
     }
     public void Refreshslider(float _value)
     {
-        soundSlider.value = _value;
+        Slider_Volume.value = _value;
     }
 }
