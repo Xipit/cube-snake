@@ -3833,7 +3833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RandomSlider: {fileID: 2131940860}
-  SquareSlider: {fileID: 0}
+  SquareSlider: {fileID: 1652454983}
   SpeedText: {fileID: 719144547}
   SpeedSlider: {fileID: 1181329598}
   DimensionText: {fileID: 2102624366}
@@ -7091,14 +7091,6 @@ MonoBehaviour:
   PanelSettings: {fileID: 525345994}
   PanelTutorial: {fileID: 927006705}
   PanelFreeMode: {fileID: 741940747}
-  PanelDead: {fileID: 1329952563}
-  PanelPause: {fileID: 946005120}
-  Dscore: {fileID: 254796649}
-  Dcover: {fileID: 159640341}
-  Pscore: {fileID: 1809172961}
-  Pcover: {fileID: 162428232}
-  scoreValue: 300
-  coverValue: 69
 --- !u!4 &1242063443
 Transform:
   m_ObjectHideFlags: 0
