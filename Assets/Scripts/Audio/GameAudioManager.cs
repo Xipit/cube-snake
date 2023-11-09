@@ -24,6 +24,19 @@ public class GameAudioManager : MonoBehaviour
 
     private void Start()
     {
+        if(!EatSnackAudioSource || !GameOverAudioSource || !BackgroundAudioSource)
+        {
+            Debug.LogError("Audio Sources have not been set in editor!");
+            return;
+        }
+
+        if(!FrontAudioClip || !BackAudioClip || !RightAudioClip || !LeftAudioClip || !UpAudioClip || !DownAudioClip)
+        {
+            Debug.LogError("Audio Clips have not been set in editor!");
+            return;
+        }
+
+
         BackgroundAudioSource.Play();
 
         CurrentAudioSource = gameObject.AddComponent<AudioSource>();

@@ -44,8 +44,6 @@ public class CubeSpawner : MonoBehaviour
         director.AssignCubeAndPrefabs(cube, FieldPrefabs, TunnelPrefab, DecorationPrefabs, DecorationPercentage);
         director.InstantiateCubeContent();
 
-        // TODO add snack reference to snake -> so snake can "eat" snacks
-        // TODO pass position of snakes Points, so snack wont spawn inside snake
         Snack snack = new Snack(snackPrefabs, cube);
 
         if(!snake){
@@ -53,7 +51,7 @@ public class CubeSpawner : MonoBehaviour
             return;
         }
 
-        snake.StartSnake(cube, CubeSideCoordinate.Front, snack);
+        snake.StartSnake(cube, CubeSideCoordinate.Front, snack, mode);
     }
 
     private void DetermineValuesFromGameMode(GameMode mode)
@@ -75,19 +73,6 @@ public class CubeSpawner : MonoBehaviour
         {
             Dimension = new Dimension3D(Dimension.GetRandomDimension());
         }
-
-
-        if (!mode.sidesAreUnique)
-        {
-            CubeSideCoordinate oneSideToRuleThemAll = (CubeSideCoordinate)Random.Range(0, 6);
-
-            for (int i = 0; i < 6; i++)
-            {
-                FieldPrefabs[i] = FieldPrefabs[(int)oneSideToRuleThemAll];
-                DecorationPrefabs[i] = DecorationPrefabs[(int)oneSideToRuleThemAll];
-            }
-        }
-
     }
 
     private bool IsReadyForSpawn(Dimension3D dimension)
