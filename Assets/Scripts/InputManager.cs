@@ -36,6 +36,7 @@ public class InputManager : MonoBehaviour
         
         return direction;
     }
+
     private void Awake()
     {
         // If there is an instance, and it's not me, delete myself.

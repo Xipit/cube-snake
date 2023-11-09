@@ -10,17 +10,9 @@ public class MainMenuManager : MonoBehaviour
     public GameObject PanelSettings;
     public GameObject PanelTutorial;
     public GameObject PanelFreeMode;
-    public GameObject PanelDead;
-    public GameObject PanelPause;
     
-    public TextMeshProUGUI Dscore;
-    public TextMeshProUGUI Dcover;
-    public TextMeshProUGUI Pscore;
-    public TextMeshProUGUI Pcover;
-
+    
   
-    public int scoreValue = 300;
-    public float coverValue = 69;
 
 
 
@@ -67,21 +59,10 @@ public class MainMenuManager : MonoBehaviour
         CloseAllPanels();
     }
 
-    public void showScore()
-    {
-        // Get the slider's value and update the Text component
-        Dscore.text = "Score: " + scoreValue; 
-        Dcover.text = "Covert of the Cube: " + coverValue + "%";
-        Pscore.text = "Score: " + scoreValue;
-        Pcover.text = "Covert of the Cube: " + coverValue + "%";
-    }
-
     private void CloseAllPanels()
     {
         PanelFreeMode.SetActive(false);
         PanelSettings.SetActive(false);
         PanelTutorial.SetActive(false);
-        PanelDead.SetActive(false);
-        PanelPause.SetActive(false);
     }
 }
