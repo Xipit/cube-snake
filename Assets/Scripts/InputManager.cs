@@ -6,7 +6,6 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
-
     public InputDirection? GetPlayerInput(InputDirection stepDirection)
     {
         InputDirection? direction = null;
