@@ -24,10 +24,9 @@ public class MainMenuManager : MonoBehaviour
 
 
 
-    public void StartGame()
+    public void StartRandomGame()
     {
-        // Load the game scene when the "Start" button is clicked
-        // SceneManager.LoadScene("GameScene");
+        GameModeManager.Instance.StartGameWithGameMode(GameMode.CreateRandomGameMode());
     }
 
     public void OpenTutorialPanel()

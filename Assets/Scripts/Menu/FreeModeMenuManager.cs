@@ -10,21 +10,27 @@ public class FreeModeMenuManager : MonoBehaviour
     [Header("Random")]
     public Slider RandomSlider;
 
+    [Header("Square")]
+    public Slider SquareSlider;
+
     [Header("Speed")]
     public TextMeshProUGUI SpeedText;
     public Slider SpeedSlider;
 
     [Header("Dimension")]
+    public TextMeshProUGUI DimensionText;
     public TMP_InputField DimensionXInput;
     public TMP_InputField DimensionYInput;
     public TMP_InputField DimensionZInput;
 
     private void Start()
     {
-        // Attach a function to the "onValueChanged" event for each InputField
-        DimensionXInput.onValueChanged.AddListener(OnDimensionInputChanged);
-        DimensionYInput.onValueChanged.AddListener(OnDimensionInputChanged);
-        DimensionZInput.onValueChanged.AddListener(OnDimensionInputChanged);
+        // Attach a function to the "onDeselect" event for each InputField
+        DimensionXInput.onDeselect.AddListener(ValidateDimensionInput);
+        DimensionYInput.onDeselect.AddListener(ValidateDimensionInput);
+        DimensionZInput.onDeselect.AddListener(ValidateDimensionInput);
+
+        RandomSlider.onValueChanged.AddListener(WIPDImensionTextChange);
     }
 
     public void StartGame()
@@ -32,14 +38,15 @@ public class FreeModeMenuManager : MonoBehaviour
         GameMode selectedGameMode = ScriptableObject.CreateInstance<GameMode>();
 
         // apply values from UI to GameMode
-        selectedGameMode.dimension = GetDimensionInputValue();
-
         selectedGameMode.dimensionsAreRandom =
-            RandomSlider.value.ToString() == "1" ? true : false;
+            RandomSlider.value == 1 ? true : false;
 
-        selectedGameMode.sidesAreUnique = true;
+        selectedGameMode.cubeIsSquare =
+            SquareSlider.value == 1 ? true : false;
 
-        selectedGameMode.cubeIsSquare = false; // TODO add UI to select option
+        selectedGameMode.speedFactor = SpeedSlider.value;
+
+        selectedGameMode.dimension = GetDimensionInputValue();
 
 
         GameModeManager.Instance.StartGameWithGameMode(selectedGameMode);
@@ -49,8 +56,6 @@ public class FreeModeMenuManager : MonoBehaviour
     {
         // Get the slider's value and update the Text component
         SpeedText.text = "x " + SpeedSlider.value.ToString("F1") + " Speed";
-
-        // TODO add speed to gameMode
     }
 
     private Vector3 GetDimensionInputValue()
@@ -62,7 +67,7 @@ public class FreeModeMenuManager : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
-    private void OnDimensionInputChanged(string newValue)
+    private void ValidateDimensionInput(string newValue)
     {
         // Check if the input is a valid integer
         if (int.TryParse(newValue, out int value))
@@ -78,6 +83,19 @@ public class FreeModeMenuManager : MonoBehaviour
             // If the input is not a valid integer, reset it to the minimum value
             TMP_InputField inputField = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>();
             inputField.text = Dimension3D.MIN.ToString();
+            
+        }
+    }
+
+    private void WIPDImensionTextChange(float newValue)
+    {
+        if(newValue == 1)
+        {
+            DimensionText.text = "Max Dimension";
+        }
+        else
+        {
+            DimensionText.text = "Dimension";
         }
     }
 }

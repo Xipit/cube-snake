@@ -26,19 +26,36 @@ public class GameMode : ScriptableObject
     /// Specifies dimension of the cube. Floats will be casted to integers.
     /// <br/> If [dimensionsAreRandom] is true, then [dimension] specifies the maximum possible dimension. 
     /// </summary>
-    public Vector3 dimension;
+    public Vector3 dimension = new Vector3(Dimension3D.MIN, Dimension3D.MIN, Dimension3D.MIN);
 
     /// <summary>
-    /// Specifies if all 6 sides of the cube are unique.
-    /// <br/> If [sidesAreUnique] is false, then the style of a random side will be applied to all sides.
+    /// Specifies how fast the snake should move
     /// </summary>
-    public bool sidesAreUnique = true;
+    public float speedFactor = 1;
 
     public void Set(GameMode mode)
     {
         dimensionsAreRandom = mode.dimensionsAreRandom;
         cubeIsSquare = mode.cubeIsSquare;
         dimension = mode.dimension;
-        sidesAreUnique = mode.sidesAreUnique;
+        speedFactor = mode.speedFactor;
+    }
+
+    public static GameMode CreateRandomGameMode()
+    {
+        GameMode mode = ScriptableObject.CreateInstance<GameMode>();
+
+        mode.cubeIsSquare = Random.Range(0, 1) > 0.5 ? true : false;
+        mode.dimensionsAreRandom = Random.Range(0, 1) > 0.5 ? true : false;
+
+        // restrict to half the maximum, as that is barely playable and only for very brave people
+        int x = Random.Range(Dimension3D.MIN, Dimension3D.MAX / 2);
+        int y = Random.Range(Dimension3D.MIN, Dimension3D.MAX / 2);
+        int z = Random.Range(Dimension3D.MIN, Dimension3D.MAX / 2);
+        mode.dimension = new Vector3(x, y, z);
+
+        mode.speedFactor = Random.Range(0.5F, 1);
+
+        return mode;
     }
 }

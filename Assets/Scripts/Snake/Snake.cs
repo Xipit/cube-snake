@@ -35,12 +35,15 @@ namespace Snake
 
         private bool shouldGrowNextUpdate = false;
 
-        public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack)
+        public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack, GameMode mode)
         {
             this.Cube = cube;
             this.Snack = snack;
             this.SplinePath = transform.GetComponent<SplineContainer>();
             this.Points = CreateStartPoints(cube, startSide);
+
+            // stepInterval = 0.4 / 2 = 0.2
+            this.StepInterval = this.StepInterval / mode.speedFactor;
 
             BuildSnakeBody();
 
