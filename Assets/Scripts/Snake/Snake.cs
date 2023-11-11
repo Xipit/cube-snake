@@ -178,15 +178,9 @@ namespace Snake
             }
         }
 
-        private void MoveAcrossEdge(CubePoint point)
-        {
-
-        }
-
-
         private void StopSnake()
         {
-            PauseSnake();
+            Body.PauseSnake();
 
             CancelInvoke(nameof(DetermineNextStepDirection));
             CancelInvoke(nameof(UpdateSnake));
