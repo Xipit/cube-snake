@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Splines;
 using System.Linq;
 using System;
+using System.Drawing;
 using Snake;
 #nullable enable
 
@@ -18,26 +19,32 @@ public class SnakeSpline
     public SplineContainer TempSplinePath { get; private set; }
 
     private Tunnel? Tunnel;
-    private CubePoint? TunnelEntry;
-    private int CurrentStepsInsideTunnel = 0;
-
+    public int CurrentStepsInsideTunnel = 0;
     private int StepsInsideTunnel = 3;
 
+    public DirectionOnCubeSide ReferenceDirectionForInput;
 
-    public SnakeSpline(Transform snakeObject, Cube cube, CubeSideCoordinate startSide)
+    public SnakeSpline(Transform snakeObject, Cube cube, CubeSideCoordinate startSide, DirectionOnCubeSide referenceDirectionForInput)
     {
-        this.Points = CreateStartPoints(cube, startSide);
-
         SplineContainer[] splineContainers = snakeObject.GetComponents<SplineContainer>();
         this.SplinePath = splineContainers[0];
         this.TempSplinePath = splineContainers[1];
+        this.ReferenceDirectionForInput = referenceDirectionForInput;
 
-        // TODO also check for TempSplinepath, before it would access index out of bounds
         if (!this.SplinePath)
         {
             Debug.LogError("Couldnt get Splinepath. Snake GameObject needs a Spline component attached!");
             return;
         }
+        
+        if (!this.TempSplinePath)
+        {
+            Debug.LogError("Couldnt get TempSplinepath. Snake GameObject needs a second Spline component attached!");
+            return;
+        }
+        
+        
+        this.Points = CreateStartPoints(cube, startSide);
     }
 
     private List<CubePoint> CreateStartPoints(Cube cube, CubeSideCoordinate startSide)
@@ -88,23 +95,25 @@ public class SnakeSpline
     public void VisualiseNextStepDirection(InputDirection stepInputDirection, Cube cube)
     {
         CubePoint snakeHead = GetSnakeHead();
-
-        GetSplineWithSnakeHead().Spline.SetKnot(TempSplinePath.Spline.Count - 1, CalculateSplineKnot(snakeHead, stepInputDirection, cube));
+        SplineContainer splinePathWithSnakeHead = GetSplineWithSnakeHead();
+            
+        splinePathWithSnakeHead.Spline.SetKnot(splinePathWithSnakeHead.Spline.Count - 1, CalculateSplineKnot(snakeHead, stepInputDirection, cube));
     }
 
     public void SetTunnel(Tunnel tunnel, CubePoint tunnelEntry)
     {
         Tunnel = tunnel;
-        TunnelEntry = tunnelEntry;
     }
 
     /// <summary>
     /// Delete tail of splineArray and spawn new head, according to stepDirection
     /// </summary>
-    public void UpdateSpline(DirectionOnCubeSide stepDirectionOnCubeSide, InputDirection stepInputDirection, CubePoint nextPoint, Cube cube, bool headGoesThroughTunnel)
+    public void UpdateSpline(DirectionOnCubeSide stepDirectionOnCubeSide, InputDirection stepInputDirection, CubePoint nextPoint, Cube cube, DirectionOnCubeSide referenceDirectionForInput, bool shouldGrow)
     {
+        ReferenceDirectionForInput = referenceDirectionForInput;
         // Head is in Tunnel
-        if (headGoesThroughTunnel && TunnelEntry != null)
+        bool headIsInTunnel = Tunnel?.HeadGoesThroughTunnel ?? false;
+        if (headIsInTunnel)
         {
             if (CurrentStepsInsideTunnel == 0)
             {
@@ -120,8 +129,8 @@ public class SnakeSpline
             else if (CurrentStepsInsideTunnel == StepsInsideTunnel)
             {
                 ExitTunnel(stepInputDirection, cube);
-
-                UpdateReferenceDirectionForInputOnOppositeSide(TunnelEntry);
+                
+                Tunnel.HeadGoesThroughTunnel = false;
             }
             else
             {
@@ -144,7 +153,7 @@ public class SnakeSpline
             GetSplineWithSnakeHead().Spline.Add(CalculateSplineKnot(nextPoint, stepInputDirection, cube));
             GetPointsWithSnakeHead().Add(nextPoint);
 
-            if (ShouldGrowNextUpdate is false)
+            if (shouldGrow is false)
             {
                 // After being in the tunnel it is possible, that the splinePath contains less elements than Points
                 if (SplinePath.Spline.Count > 0)
@@ -153,8 +162,6 @@ public class SnakeSpline
                 }
                 Points.RemoveAt(0);
             }
-            ShouldGrowNextUpdate = false;
-
 
             // Reset Points and TempPoints, as the snake has now completely exited the tunnel
             if (Points.Count == 0)
@@ -164,6 +171,8 @@ public class SnakeSpline
 
                 TempPoints = new List<CubePoint>();
                 TempSplinePath.Spline = new Spline();
+                
+                Tunnel = null;
             }
 
             RotationManager.Instance.RotateEveryStep(stepInputDirection, GetSnakeHead(), cube.Dimension);
@@ -172,8 +181,8 @@ public class SnakeSpline
 
     private void EnterTunnel(InputDirection stepInputDirection, Cube cube)
     {
-        SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry, stepInputDirection, cube));
-        Points.Add(TunnelEntry);
+        SplinePath.Spline.Add(CalculateSplineKnot(Tunnel.Entry, stepInputDirection, cube));
+        Points.Add(Tunnel.Entry);
 
         CurrentStepsInsideTunnel++;
     }
@@ -181,12 +190,12 @@ public class SnakeSpline
     private void MoveInsideTunnel(InputDirection stepInputDirection, Cube cube)
     {
         // needs to added to Points, so we do decrease the length of the snake (the length depends on the length of Points)
-        Points.Add(TunnelEntry);
+        Points.Add(Tunnel.Entry);
 
         if (CurrentStepsInsideTunnel == 1)
         {
             // add one more knot inside the tunnel to store gameObjects before changing their splineContainer to TempSplinePath
-            SplinePath.Spline.Add(CalculateSplineKnot(TunnelEntry, stepInputDirection, cube));
+            SplinePath.Spline.Add(CalculateSplineKnot(Tunnel.Entry, stepInputDirection, cube));
         }
 
         CurrentStepsInsideTunnel++;
@@ -194,19 +203,37 @@ public class SnakeSpline
 
     private void ExitTunnel(InputDirection stepInputDirection, Cube cube)
     {
-        CubePoint tunnelExit = Tunnel.GetOtherCubePoint(TunnelEntry);
+        CubePoint tunnelExit = Tunnel.GetOtherCubePoint(Tunnel.Entry);
         // Knot is in the inside of the cube behind the tunnelExit
         TempSplinePath.Spline.Add(CalculateSplineKnot(tunnelExit, stepInputDirection, cube));
         TempPoints.Add(tunnelExit);
 
-        HeadGoesThroughTunnel = false;
+        RotationManager.Instance.RotateToOppositeSide(stepInputDirection);
+        UpdateReferenceDirectionForInputOnOppositeSide(Tunnel.Entry, stepInputDirection, cube);
+        
+        Tunnel.HeadGoesThroughTunnel = false;
         // Knot is located on the outside of the cube at the tunnelExit (GoesThroughTunnel needs to be false here)
         TempSplinePath.Spline.Add(CalculateSplineKnot(tunnelExit, stepInputDirection, cube));
 
         CurrentStepsInsideTunnel = 0;
-        TunnelEntry = null;
+    }
+    
+    private void UpdateReferenceDirectionForInputOnOppositeSide(CubePoint point, InputDirection stepInputDirection, Cube cube)
+    {
+        DirectionOnCubeSide direction = stepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
 
-        RotationManager.Instance.RotateToOppositeSide(stepInputDirection);
+        for (int i = 0; i < 2; i++)
+        {
+            CubePoint nextPoint = point.GetPointOnNeighbour(direction, cube);
+
+            (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
+                point.SideCoordinate.GetNeighborWithDirection(direction);
+
+            ReferenceDirectionForInput = stepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
+
+            point = nextPoint;
+            direction = nextSide.neighborDirection;
+        }
     }
 
     private BezierKnot CalculateSplineKnot(CubePoint cubePoint, InputDirection stepInputDirection, Cube cube)
@@ -216,7 +243,7 @@ public class SnakeSpline
         BezierKnot bezierKnot = new BezierKnot();
 
         bezierKnot.Position = CalculateKnotPosition(cubePoint, stepDirectionOnCubeSide, cube);
-        bezierKnot.Rotation = HeadGoesThroughTunnel
+        bezierKnot.Rotation = Tunnel is { HeadGoesThroughTunnel: true }
             ? CalculateKnotRotationInTunnel(cubePoint, stepDirectionOnCubeSide)
             : CalculateKnotRotation(cubePoint, stepDirectionOnCubeSide);
         bezierKnot.TangentIn = new Vector3(0, 0, -0.33f);
@@ -234,7 +261,8 @@ public class SnakeSpline
         Vector3 positionInSide = point.FieldCoordinate.GetPositionInCubeSide(cube.Scale);
 
         // move the position to the edge of the field, to which the snake moves. Except it is a tunnelField, than we need the centered position.
-        if (!HeadGoesThroughTunnel)
+        bool shouldMoveOnCube = !Tunnel?.HeadGoesThroughTunnel ?? true;
+        if (shouldMoveOnCube)
         {
             positionInSide += (stepDirectionOnCubeSide switch
             {
@@ -269,7 +297,7 @@ public class SnakeSpline
         Vector3 rotationOnSide;
 
         // The rotation of the knot must point into the cube if the point is a TunnelEntry. If it is a TunnelExit, it must point away from the cube.
-        bool isTunnelEntry = point.IsEqual(TunnelEntry!);
+        bool isTunnelEntry = point.IsEqual(Tunnel.Entry!);
 
         // this switch is essential for the rotation of a knot on a cubeSide when the snake moves into the cube
         // I couldn't get the rotation around a specific point, so it needed this workaround
@@ -397,6 +425,20 @@ public class SnakeSpline
 
     public List<CubePoint> GetAllPoints()
     {
-        return TempPoints.Concat(Points).ToList();
+        return Points.Concat(TempPoints).ToList();
+    }
+
+    public List<CubePoint> GetAllPointsWithoutSnakeHead()
+    {
+        List<CubePoint> allPoints = GetAllPoints();
+        
+        allPoints.RemoveAt(allPoints.Count - 1);
+
+        return allPoints;
+    }
+
+    public bool TunnelContainsSnakeBodyPart()
+    {
+        return (TempPoints.Count > 0);
     }
 }

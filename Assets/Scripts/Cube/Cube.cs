@@ -33,7 +33,7 @@ public class Cube
         CubePoint pointA = GetRandomPoint(dimension, false);
 
         CubeSideCoordinate opposingSide = pointA.SideCoordinate.GetOpposingCubeSideCoordinate();
-        CubeFieldCoordinate randomFieldOnOpposingSide = opposingSide.GetDimension2D(dimension).GetRandomFieldCoordinate();
+        CubeFieldCoordinate randomFieldOnOpposingSide = opposingSide.GetDimension2D(dimension).GetRandomFieldCoordinate(false);
 
         CubePoint pointB = new CubePoint(opposingSide, randomFieldOnOpposingSide);
 

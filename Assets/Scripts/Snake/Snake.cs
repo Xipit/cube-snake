@@ -33,11 +33,14 @@ namespace Snake
         private Snack Snack;
 
         private bool ShouldGrowNextUpdate = false;
-        private bool HeadGoesThroughTunnel = false;
+        private Tunnel? Tunnel = null;
 
         public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack, GameMode mode)
         {
-            this.Spline = new SnakeSpline(this.transform, cube, startSide);
+            // This defines how the cube is rotated on the spawnSide, so that _Up_ Input matches _Up_ on the screen
+            ReferenceDirectionForInput = DirectionOnCubeSide.posVert;
+            
+            this.Spline = new SnakeSpline(this.transform, cube, startSide, ReferenceDirectionForInput);
             this.Body = new SnakeBody(cube, StepInterval, Spline.SplinePath, this.transform, SnakeHeadPrefab, SnakeBodyPrefab, SnakeTailPrefab, EmptyPrefab);
             this.Cube = cube;
             this.Snack = snack;
@@ -46,8 +49,6 @@ namespace Snake
             this.StepInterval = this.StepInterval / mode.speedFactor;
 
             StepInputDirection = InputDirection;
-            // This defines how the cube is rotated on the spawnSide, so that _Up_ Input matches _Up_ on the screen
-            ReferenceDirectionForInput = DirectionOnCubeSide.posVert;
 
             RotationManager.Instance.RotateToCubePoint(Spline.GetSnakeHead(), Cube.Dimension);
 
@@ -66,23 +67,25 @@ namespace Snake
             InputDirection = InputManager.Instance.GetPlayerInput(StepInputDirection) ?? InputDirection;
         }
 
-        
         private void UpdateSnake()
         {
+            ReferenceDirectionForInput = Spline.ReferenceDirectionForInput;
             DirectionOnCubeSide stepDirectionOnCubeSide = StepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
             CubePoint nextPoint = GetPointOnCubeInDirection(stepDirectionOnCubeSide);
-
-
+            
             foreach (Tunnel tunnel in Cube.Tunnels)
             {
                 if (tunnel.HasPoint(nextPoint))
                 {
-                    HeadGoesThroughTunnel = true;
-                    Spline.SetTunnel(tunnel, nextPoint);
-                    // TunnelEntry = tunnel.PointA.IsEqual(nextPoint) ? tunnel.PointA : tunnel.PointB;
+                    Tunnel = tunnel;
+                    Tunnel.Entry = nextPoint;
+                    Tunnel.HeadGoesThroughTunnel = true;
+                    
+                    Spline.SetTunnel(Tunnel, nextPoint);
                 }
             }
-            Spline.UpdateSpline(stepDirectionOnCubeSide, StepInputDirection, nextPoint, Cube, HeadGoesThroughTunnel);
+            Spline.UpdateSpline(stepDirectionOnCubeSide, StepInputDirection, nextPoint, Cube, ReferenceDirectionForInput, ShouldGrowNextUpdate);
+            ShouldGrowNextUpdate = false;
 
             // check if the snack is going to be eaten by the snake
             if (nextPoint.IsEqual(Snack.Position))
@@ -91,16 +94,17 @@ namespace Snake
             }
             else
             {
-                Body.UpdateSnakeBody(Spline.SplinePath, Spline.TempSplinePath);
+                bool tunnelContainsSnakeBodyPart = Spline.TunnelContainsSnakeBodyPart();
+                bool headGoesThroughTunnel = Tunnel?.HeadGoesThroughTunnel ?? false;
+                Body.UpdateSnakeBody(Spline.SplinePath, Spline.TempSplinePath, headGoesThroughTunnel, Spline.CurrentStepsInsideTunnel, tunnelContainsSnakeBodyPart);
             }
 
-            if (nextPoint.IsEqualToPointInList(Spline.GetAllPoints()))
+            if (nextPoint.IsEqualToPointInList(Spline.GetAllPointsWithoutSnakeHead()))
             {
                 StopSnake();
                 GameManager.Instance.GameOver();
             }
         }
-        
 
 
         /// <summary>
@@ -108,7 +112,7 @@ namespace Snake
         /// </summary>
         private void DetermineNextStepDirection()
         {
-            if (HeadGoesThroughTunnel)
+            if (Tunnel is {HeadGoesThroughTunnel: true})
             {
                 return;
             }
@@ -119,7 +123,6 @@ namespace Snake
             }
 
             StepInputDirection = InputDirection;
-
             Spline.VisualiseNextStepDirection(StepInputDirection, Cube);
         }
 
@@ -131,26 +134,6 @@ namespace Snake
             GameAudioManager.Instance.EatSnackAudioSource.Play();
             ShouldGrowNextUpdate = true;
         }
-
-        private void UpdateReferenceDirectionForInputOnOppositeSide(CubePoint point)
-        {
-            DirectionOnCubeSide direction = StepInputDirection.ToLocalDirectionOnCubeSide(ReferenceDirectionForInput);
-
-            for (int i = 0; i < 2; i++)
-            {
-                CubePoint nextPoint = point.GetPointOnNeighbour(direction, Cube);
-
-                (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
-                    point.SideCoordinate.GetNeighborWithDirection(direction);
-
-                ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
-
-                point = nextPoint;
-                direction = nextSide.neighborDirection;
-            }
-        }
-
-        
 
         private CubePoint GetPointOnCubeInDirection(DirectionOnCubeSide direction)
         {
@@ -171,7 +154,8 @@ namespace Snake
                 //ShouldMoveOverEdge = true;
                 //TempReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
                 ReferenceDirectionForInput = StepInputDirection.GetInputUpAsDirectionOnCubeSide(nextSide.neighborDirection);
-
+                RotationManager.Instance.RotateOneSide(StepInputDirection, nextPoint, Cube.Dimension);
+                
                 GameAudioManager.Instance.SwitchCubeSide(nextPoint.SideCoordinate);
 
                 return nextPoint;

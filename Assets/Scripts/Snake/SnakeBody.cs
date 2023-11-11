@@ -28,17 +28,17 @@ public class SnakeBody
         SnakeTailPrefab = snakeTailPrefab;
         EmptyPrefab = emptyPrefab;
 
-        BodyParts = BuildSnakeBody(splinePath);
+        BuildSnakeBody(splinePath);
     }
 
-    public void UpdateSnakeBody(SplineContainer splinePath, SplineContainer tempSplinePath)
+    public void UpdateSnakeBody(SplineContainer splinePath, SplineContainer tempSplinePath, bool headGoesThroughTunnel, int currentStepsInsideTunnel, bool tunnelContainsSnakeBodyPart)
     {
         // Points & SplinePath --> Points and Knots before going into the Tunnel
         // TempPoints & TempSplinePath --> Points and Knots after coming out of the TunnelExit
 
-        if (HeadGoesThroughTunnel && CurrentStepsInsideTunnel > 1)
+        if (headGoesThroughTunnel && currentStepsInsideTunnel > 1)
         {
-            int movingBodyPartsCount = BodyParts.Count - (CurrentStepsInsideTunnel - 2);
+            int movingBodyPartsCount = BodyParts.Count - (currentStepsInsideTunnel - 2);
 
             // stop the gameObjects which are moved into the cube through the tunnelEntry
             for (int i = (BodyParts.Count - 1); i >= movingBodyPartsCount; i--)
@@ -61,7 +61,7 @@ public class SnakeBody
             }
 
         }
-        else if (TempPoints.Count > 0)
+        else if (tunnelContainsSnakeBodyPart)
         {
             // a part of the snake came through the tunnelExit and is now moving on the cube again
 
@@ -152,13 +152,13 @@ public class SnakeBody
         }
     }
 
-    private void PauseSnake(List<GameObject> bodyParts)
+    public void PauseSnake()
     {
-        for (int i = 0; i < bodyParts.Count - 1; i++)
+        for (int i = 0; i < BodyParts.Count - 1; i++)
         {
-            SplineAnimate animate = bodyParts[i].GetComponent<SplineAnimate>();
+            SplineAnimate animate = BodyParts[i].GetComponent<SplineAnimate>();
 
-            animate.StartOffset = i * (1.0f / bodyParts.Count);
+            animate.StartOffset = i * (1.0f / BodyParts.Count);
             animate.MaxSpeed = 0; // Pause
         }
     }
@@ -166,7 +166,7 @@ public class SnakeBody
     /// <summary>
     /// Fill the List of BodyParts (instantiated GameObjects) with each part of the snake
     /// </summary>
-    private List<GameObject> BuildSnakeBody(SplineContainer splinePath)
+    private void BuildSnakeBody(SplineContainer splinePath)
     {
         List<GameObject> bodyParts = new List<GameObject>();
 
@@ -189,12 +189,12 @@ public class SnakeBody
         bodyParts.Add(
             InstantiateManager.Instance.InstantiateGameObjectAsChild(EmptyPrefab, SnakeObject));
 
+        BodyParts = bodyParts;
+        
         for (int i = 0; i < bodyParts.Count; i++)
         {
             ConfigureBodyAnimator(i, splinePath);
         }
-
-        return bodyParts;
     }
 
     /// <summary>

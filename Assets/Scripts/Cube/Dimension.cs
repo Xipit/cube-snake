@@ -99,9 +99,10 @@ public class Dimension2D
         this.V = Mathf.Max(0, b);
     }
 
-    public CubeFieldCoordinate GetRandomFieldCoordinate()
+    public CubeFieldCoordinate GetRandomFieldCoordinate(bool canTouchEdge = true)
     {
-        return new CubeFieldCoordinate(Random.Range(0, H), Random.Range(0, V));
+        if (canTouchEdge) return new CubeFieldCoordinate(Random.Range(0, H), Random.Range(0, V));
+        else return GetRandomFieldCoordinateNotOnEdge();
     }
 
     public CubeFieldCoordinate GetRandomFieldCoordinateNotOnEdge()

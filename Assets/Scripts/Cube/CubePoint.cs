@@ -24,17 +24,16 @@ public class CubePoint
 
     public bool IsEqualToPointInList(List<CubePoint> points)
     {
-        bool isEqual = false;
-
-        points.ForEach((point) =>
+        foreach (CubePoint point in points)
         {
             if (IsEqual(point))
             {
-                isEqual = true;
+                Debug.Log($"Point: {point.FieldCoordinate.H}/{point.FieldCoordinate.V}, {point.SideCoordinate}");
+                return true;
             }
-        });
+        }
 
-        return isEqual;
+        return false;
     }
 
     public CubePoint GetPointOnNeighbour(DirectionOnCubeSide currentDirectionOnSide, Cube cube)

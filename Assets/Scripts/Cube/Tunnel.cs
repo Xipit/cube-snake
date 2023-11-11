@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,9 @@ public class Tunnel
 {
     public CubePoint PointA;
     public CubePoint PointB;
+    public CubePoint? Entry = null; // could be either PointA or PointB --> each time a snake moves on a tunnel, this should be refreshed
+
+    public bool HeadGoesThroughTunnel = false;
 
     public Tunnel (CubePoint pointA, CubePoint pointB)
     {
