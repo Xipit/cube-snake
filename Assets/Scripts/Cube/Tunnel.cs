@@ -18,17 +18,10 @@ public class Tunnel
         return point.IsEqual(PointA) || point.IsEqual(PointB);
     }
 
-    public CubePoint GetExitCubePoint(CubePoint entry)
+    public CubePoint GetOtherCubePoint(CubePoint entry)
     {
-        if (entry.IsEqual(PointA))
-        {
-            return PointB;
-        }
-
-        if (entry.IsEqual(PointB))
-        {
-            return PointA;
-        }
+        if (entry.IsEqual(PointA)) return PointB;
+        if (entry.IsEqual(PointB)) return PointA;
 
         return entry;
     }

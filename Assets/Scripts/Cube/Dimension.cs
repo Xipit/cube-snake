@@ -104,6 +104,11 @@ public class Dimension2D
         return new CubeFieldCoordinate(Random.Range(0, H), Random.Range(0, V));
     }
 
+    public CubeFieldCoordinate GetRandomFieldCoordinateNotOnEdge()
+    {
+        return new CubeFieldCoordinate(Random.Range(1, (H - 1)), Random.Range(1, (V - 1)));
+    }
+
     public bool IsPointInDirectionInDimension(CubePoint point, DirectionOnCubeSide direction)
     {
         Vector2 vectorToNextPoint = direction.ToVector2();

@@ -21,7 +21,22 @@ public class CubePoint
             && point.FieldCoordinate.V == this.FieldCoordinate.V
             && point.SideCoordinate == this.SideCoordinate;
     }
-    
+
+    public bool IsEqualToPointInList(List<CubePoint> points)
+    {
+        bool isEqual = false;
+
+        points.ForEach((point) =>
+        {
+            if (IsEqual(point))
+            {
+                isEqual = true;
+            }
+        });
+
+        return isEqual;
+    }
+
     public CubePoint GetPointOnNeighbour(DirectionOnCubeSide currentDirectionOnSide, Cube cube)
     {
         (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =
@@ -109,42 +124,5 @@ public class CubePoint
     public override string ToString()
     {
         return this.SideCoordinate.ToString() + ": " + this.FieldCoordinate.ToString();
-    }
-
-    public bool IsEqualToPointInLists(List<CubePoint> points, List<CubePoint> tempPoints)
-    {
-        // check if a snakeBodyPart is on the next point (TempPoints) --> GameOver
-        if (tempPoints.Count > 1)
-        {
-            for (int i = 0; i < tempPoints.Count - 2; i++)
-            {
-                if (IsEqual(tempPoints[i]))
-                {
-                    return true;
-                }
-            }
-                
-            // check if a snakeBodyPart is on the next point (Points) --> GameOver
-            for (int i = 0; i < points.Count ; i++)
-            {
-                if (IsEqual(points[i]))
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            // check if a snakeBodyPart is on the next point (Points) --> GameOver
-            for (int i = 0; i < points.Count - 2; i++)
-            {
-                if (IsEqual(points[i]))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }
