@@ -48,9 +48,6 @@ namespace Snake
         private bool ShouldMoveOverEdge;
         private DirectionOnCubeSide TempReferenceDirectionForInput;
 
-        private bool ShouldMoveOverEdge;
-        private DirectionOnCubeSide TempReferenceDirectionForInput;
-
         public void StartSnake(Cube cube, CubeSideCoordinate startSide, Snack snack, GameMode mode)
         {
             this.Cube = cube;
