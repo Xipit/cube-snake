@@ -75,6 +75,11 @@ public class Dimension3D
         }
     }
 
+    public int GetHighestDimension()
+    {
+        return Mathf.Max(X, Y, Z);
+    }
+
     public int GetFieldAmount()
     {
         return ((X * Y) + (Y * Z) + (Z * X)) * 2;

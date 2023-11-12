@@ -4,7 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-
+/// <summary>
+/// Manage UI for Free Mode Popup.
+/// <br/> Should be attached to the Free Mode Panel.
+/// </summary>
 public class FreeModeMenuManager : MonoBehaviour
 {
     [Header("Random")]

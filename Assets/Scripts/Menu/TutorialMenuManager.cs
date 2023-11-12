@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manage UI for Tutorial Popup.
+/// <br/> Should be attached to the Tutorial Panel.
+/// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public GameMode Tutorial1;

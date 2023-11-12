@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Extensions;
 #nullable enable
 
 public class CubeSpawner : MonoBehaviour
@@ -48,9 +49,11 @@ public class CubeSpawner : MonoBehaviour
         Snack snack = new Snack(snackPrefabs, cube);
 
         if(!snake){
-            Debug.LogError("SNake reference has not been set. Cant start snake");
+            Debug.LogError("Snake reference has not been set. Cant start snake");
             return null;
         }
+
+        RotationManager.Instance.transform.localScale = DetermineCubeObjectScaleToFitInCamera(Dimension);
 
         snake.StartSnake(cube, CubeSideCoordinate.Front, snack, mode);
 
@@ -76,6 +79,17 @@ public class CubeSpawner : MonoBehaviour
         {
             Dimension = new Dimension3D(Dimension.GetRandomDimension());
         }
+    }
+
+    private Vector3 DetermineCubeObjectScaleToFitInCamera(Dimension3D dimension)
+    {
+        float highestDimension = dimension.GetHighestDimension();
+
+        float scale = Mathf.Min(1, (float)(6 / highestDimension) + 0.12F);
+
+        Debug.Log("Scale for rotationreference: " + scale);
+
+        return new Vector3(scale, scale, scale);
     }
 
     private bool IsReadyForSpawn(Dimension3D dimension)
