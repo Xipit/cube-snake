@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dimensionsAreRandom: 0
   cubeIsSquare: 0
-  dimension: {x: 3, y: 4, z: 5}
+  dimension: {x: 6, y: 6, z: 6}
   speedFactor: 1
