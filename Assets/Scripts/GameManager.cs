@@ -42,6 +42,13 @@ public class GameManager : MonoBehaviour
         GameMenuManager.Instance.OpenGameOverPanel(CalculateScore(), CalculateFieldCoverage());
     }
 
+    public void GameWin()
+    {
+        GameState = GameState.GameWin;
+
+        GameMenuManager.Instance.OpenGameWinPanel(CalculateScore(), CalculateFieldCoverage());
+    }
+
     public void PauseGame()
     {
         if(GameState != GameState.Active)
@@ -72,6 +79,11 @@ public class GameManager : MonoBehaviour
     public void AddSnakeLength()
     {
         SnakeLength++;
+
+        if(SnakeLength == MaxSnakeLength)
+        {
+            GameWin();
+        }
     }
 
     private int CalculateScore()
@@ -128,5 +140,6 @@ public enum GameState
 {
     Active = 0,
     Paused = 1,
-    GameOver = 2
+    GameOver = 2,
+    GameWin = 3
 }

@@ -17,6 +17,11 @@ public class GameMenuManager : MonoBehaviour
     public TextMeshProUGUI ScoreGameOver;
     public TextMeshProUGUI CubeCoverGameOver;
 
+    [Header("GameWin")]
+    public GameObject PanelGameWin;
+    public TextMeshProUGUI ScoreGameWin;
+    public TextMeshProUGUI CubeCoverGameWin;
+
     [Header("Pause")]
     public GameObject PanelPause;
     public TextMeshProUGUI ScorePause;
@@ -43,19 +48,33 @@ public class GameMenuManager : MonoBehaviour
         UpdateScoreText(score, cubeCoverPercentage);
     }
 
+    public void OpenGameWinPanel(int score, float cubeCoverPercentage)
+    {
+        CloseAllPanels();
+        PanelGameWin.SetActive(!PanelGameWin.activeSelf);
+
+        UpdateScoreText(score, cubeCoverPercentage);
+    }
+
     private void UpdateScoreText(int score, float cubeCoverPercentage)
     {
-        ScoreGameOver.text = "Score: " + score;
-        CubeCoverGameOver.text = "Cube covered: " + cubeCoverPercentage + "%";
+        string scoreText = "Score: " + score;
+        string cubeCoverText = "Cube covered: " + cubeCoverPercentage + "%";
 
-        ScorePause.text = "Score: " + score;
-        CubeCoverPause.text = "Cube covered: " + cubeCoverPercentage + "%";
+        ScoreGameOver.text = scoreText;
+        ScoreGameWin.text = scoreText;
+        ScorePause.text = scoreText;
+
+        CubeCoverGameOver.text = cubeCoverText;
+        CubeCoverGameWin.text = cubeCoverText;
+        CubeCoverPause.text = cubeCoverText;
     }
 
     public void CloseAllPanels()
     {
         PanelGameOver.SetActive(false);
         PanelPause.SetActive(false);
+        PanelGameOver.SetActive(false);
     }
 
     public void Resume()
