@@ -21,7 +21,21 @@ public class CubePoint
             && point.FieldCoordinate.V == this.FieldCoordinate.V
             && point.SideCoordinate == this.SideCoordinate;
     }
-    
+
+    public bool IsEqualToPointInList(List<CubePoint> points)
+    {
+        foreach (CubePoint point in points)
+        {
+            if (IsEqual(point))
+            {
+                Debug.Log($"Point: {point.FieldCoordinate.H}/{point.FieldCoordinate.V}, {point.SideCoordinate}");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public CubePoint GetPointOnNeighbour(DirectionOnCubeSide currentDirectionOnSide, Cube cube)
     {
         (CubeSideCoordinate neighborCoordinate, DirectionOnCubeSide neighborDirection) nextSide =

@@ -16,11 +16,11 @@ public class Snack
         Cube = cube;
     }
     
-    public void AssignNewPosition(CubePoint[] snakePoints)
+    public void AssignNewPosition(CubePoint[] pointsToAvoid)
     {
         RemoveContent();
         
-        Position = Cube.GetRandomPoint(Cube.Dimension, snakePoints);
+        Position = Cube.GetRandomPoint(Cube.Dimension, pointsToAvoid);
         InstantiateContent();
     }
 

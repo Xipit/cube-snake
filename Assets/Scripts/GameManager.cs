@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#nullable enable
 
 /// <summary>
 /// This class handles GameModes and general game tasks, such as start, pause, win, etc.
@@ -14,6 +15,9 @@ public class GameManager : MonoBehaviour
 
     public GameState GameState = GameState.Active;
 
+    public int SnakeLength { get; private set; } = 3;
+    public int MaxSnakeLength { get; private set; } = 1;
+
     public void SetGameMode(GameMode mode)
     {
         this.Mode = mode;
@@ -22,7 +26,12 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         Time.timeScale = 1;
-        CubeSpawner.Instance.SpawnCube(Mode);
+        Cube? cube = CubeSpawner.Instance.SpawnCube(Mode);
+
+        if (cube is not null)
+        {
+            MaxSnakeLength = cube.Dimension.GetFieldAmount();
+        }
     }
 
     public void GameOver()
@@ -30,7 +39,7 @@ public class GameManager : MonoBehaviour
         GameState = GameState.GameOver;
 
         GameAudioManager.Instance.GameOver();
-        GameMenuManager.Instance.OpenGameOverPanel(3, 40);
+        GameMenuManager.Instance.OpenGameOverPanel(CalculateScore(), CalculateFieldCoverage());
     }
 
     public void PauseGame()
@@ -41,7 +50,7 @@ public class GameManager : MonoBehaviour
         }
         
         Time.timeScale = 0;
-        GameMenuManager.Instance.OpenPausePanel(3, 40);
+        GameMenuManager.Instance.OpenPausePanel(CalculateScore(), CalculateFieldCoverage());
 
         GameState = GameState.Paused;
         
@@ -58,7 +67,21 @@ public class GameManager : MonoBehaviour
         GameMenuManager.Instance.CloseAllPanels();
 
         GameState = GameState.Active;
-        
+    }
+
+    public void AddSnakeLength()
+    {
+        SnakeLength++;
+    }
+
+    private int CalculateScore()
+    {
+        return (SnakeLength - 3) * 10;
+    }
+
+    private float CalculateFieldCoverage()
+    {
+        return SnakeLength / MaxSnakeLength;
     }
 
     public void Start()

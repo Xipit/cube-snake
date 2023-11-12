@@ -20,6 +20,11 @@ public class InstantiateManager : MonoBehaviour
         return Instantiate(gameObject, position, rotation, parent);
     }
 
+    public GameObject InstantiateGameObjectAsChild(GameObject gameObject, Transform parent)
+    {
+        return InstantiateGameObjectAsChild(Vector3.zero, Quaternion.identity, gameObject, parent);
+    }
+
     private void Awake()
     {
         // If there is an instance, and it's not me, delete myself.

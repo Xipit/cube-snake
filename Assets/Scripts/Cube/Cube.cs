@@ -30,10 +30,10 @@ public class Cube
     // i.e. have the same point
     private Tunnel[] CreateTunnels(Dimension3D dimension)
     {
-        CubePoint pointA = GetRandomPoint(dimension);
+        CubePoint pointA = GetRandomPoint(dimension, false);
 
         CubeSideCoordinate opposingSide = pointA.SideCoordinate.GetOpposingCubeSideCoordinate();
-        CubeFieldCoordinate randomFieldOnOpposingSide = opposingSide.GetDimension2D(dimension).GetRandomFieldCoordinate();
+        CubeFieldCoordinate randomFieldOnOpposingSide = opposingSide.GetDimension2D(dimension).GetRandomFieldCoordinate(false);
 
         CubePoint pointB = new CubePoint(opposingSide, randomFieldOnOpposingSide);
 
@@ -75,12 +75,13 @@ public class Cube
     /// <summary>
     /// Generate a random point on the cube.
     /// </summary>
-    public CubePoint GetRandomPoint(Dimension3D dimension)
+    public CubePoint GetRandomPoint(Dimension3D dimension, bool canTouchEdge = true)
     {
         CubeSideCoordinate randomSideCoordinate = (CubeSideCoordinate)Random.Range(0, 6);
         Dimension2D dimensionOfSide = randomSideCoordinate.GetDimension2D(dimension);
 
-        return new CubePoint(randomSideCoordinate, dimensionOfSide.GetRandomFieldCoordinate());
+        if(canTouchEdge)    return new CubePoint(randomSideCoordinate, dimensionOfSide.GetRandomFieldCoordinate());
+        else                return new CubePoint(randomSideCoordinate, dimensionOfSide.GetRandomFieldCoordinateNotOnEdge());
     }
 
     /// <summary>

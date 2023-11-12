@@ -148,5 +148,10 @@ public class RotationManager : MonoBehaviour
         RotationOrigin.transform.rotation = cleanedRotation;
     }
 
+
+    public void RotateToOppositeSide(InputDirection direction)
+    {
+        RotateOrigin(direction, 180, true);
+    }
     
 }
