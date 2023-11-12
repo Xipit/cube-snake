@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#nullable enable
 
 public class CubeSpawner : MonoBehaviour
 {
@@ -25,13 +26,13 @@ public class CubeSpawner : MonoBehaviour
 
     public static CubeSpawner Instance { get; private set; }
 
-    public void SpawnCube(GameMode mode)
+    public Cube? SpawnCube(GameMode mode)
     {
         DetermineValuesFromGameMode(mode);
 
         if (!IsReadyForSpawn(Dimension))
         {
-            return;
+            return null;
         }
 
         Cube cube = new Cube(Dimension);
@@ -48,10 +49,12 @@ public class CubeSpawner : MonoBehaviour
 
         if(!snake){
             Debug.LogError("SNake reference has not been set. Cant start snake");
-            return;
+            return null;
         }
 
         snake.StartSnake(cube, CubeSideCoordinate.Front, snack, mode);
+
+        return cube;
     }
 
     private void DetermineValuesFromGameMode(GameMode mode)

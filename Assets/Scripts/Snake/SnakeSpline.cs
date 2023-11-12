@@ -112,7 +112,7 @@ public class SnakeSpline
     {
         ReferenceDirectionForInput = referenceDirectionForInput;
         // Head is in Tunnel
-        bool headIsInTunnel = Tunnel?.HeadGoesThroughTunnel ?? false;
+        bool headIsInTunnel = Tunnel?.IsSnakeHeadInTunnel ?? false;
         if (headIsInTunnel)
         {
             if (CurrentStepsInsideTunnel == 0)
@@ -130,7 +130,7 @@ public class SnakeSpline
             {
                 ExitTunnel(stepInputDirection, cube);
                 
-                Tunnel.HeadGoesThroughTunnel = false;
+                Tunnel.IsSnakeHeadInTunnel = false;
             }
             else
             {
@@ -211,7 +211,7 @@ public class SnakeSpline
         RotationManager.Instance.RotateToOppositeSide(stepInputDirection);
         UpdateReferenceDirectionForInputOnOppositeSide(Tunnel.Entry, stepInputDirection, cube);
         
-        Tunnel.HeadGoesThroughTunnel = false;
+        Tunnel.IsSnakeHeadInTunnel = false;
         // Knot is located on the outside of the cube at the tunnelExit (GoesThroughTunnel needs to be false here)
         TempSplinePath.Spline.Add(CalculateSplineKnot(tunnelExit, stepInputDirection, cube));
 
@@ -243,7 +243,7 @@ public class SnakeSpline
         BezierKnot bezierKnot = new BezierKnot();
 
         bezierKnot.Position = CalculateKnotPosition(cubePoint, stepDirectionOnCubeSide, cube);
-        bezierKnot.Rotation = Tunnel is { HeadGoesThroughTunnel: true }
+        bezierKnot.Rotation = Tunnel is { IsSnakeHeadInTunnel: true }
             ? CalculateKnotRotationInTunnel(cubePoint, stepDirectionOnCubeSide)
             : CalculateKnotRotation(cubePoint, stepDirectionOnCubeSide);
         bezierKnot.TangentIn = new Vector3(0, 0, -0.33f);
@@ -261,7 +261,7 @@ public class SnakeSpline
         Vector3 positionInSide = point.FieldCoordinate.GetPositionInCubeSide(cube.Scale);
 
         // move the position to the edge of the field, to which the snake moves. Except it is a tunnelField, than we need the centered position.
-        bool shouldMoveOnCube = !Tunnel?.HeadGoesThroughTunnel ?? true;
+        bool shouldMoveOnCube = !Tunnel?.IsSnakeHeadInTunnel ?? true;
         if (shouldMoveOnCube)
         {
             positionInSide += (stepDirectionOnCubeSide switch

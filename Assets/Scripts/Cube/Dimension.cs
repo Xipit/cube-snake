@@ -74,6 +74,11 @@ public class Dimension3D
                 return Z;
         }
     }
+
+    public int GetFieldAmount()
+    {
+        return ((X * Y) + (Y * Z) + (Z * X)) * 2;
+    }
 }
 
 /// <summary>

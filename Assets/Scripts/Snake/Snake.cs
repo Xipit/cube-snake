@@ -79,7 +79,7 @@ namespace Snake
                 {
                     Tunnel = tunnel;
                     Tunnel.Entry = nextPoint;
-                    Tunnel.HeadGoesThroughTunnel = true;
+                    Tunnel.IsSnakeHeadInTunnel = true;
                     
                     Spline.SetTunnel(Tunnel, nextPoint);
                 }
@@ -95,7 +95,7 @@ namespace Snake
             else
             {
                 bool tunnelContainsSnakeBodyPart = Spline.TunnelContainsSnakeBodyPart();
-                bool headGoesThroughTunnel = Tunnel?.HeadGoesThroughTunnel ?? false;
+                bool headGoesThroughTunnel = Tunnel?.IsSnakeHeadInTunnel ?? false;
                 Body.UpdateSnakeBody(Spline.SplinePath, Spline.TempSplinePath, headGoesThroughTunnel, Spline.CurrentStepsInsideTunnel, tunnelContainsSnakeBodyPart);
             }
 
@@ -112,7 +112,7 @@ namespace Snake
         /// </summary>
         private void DetermineNextStepDirection()
         {
-            if (Tunnel is {HeadGoesThroughTunnel: true})
+            if (Tunnel is {IsSnakeHeadInTunnel: true})
             {
                 return;
             }
@@ -132,6 +132,7 @@ namespace Snake
             Body.AddSnakeBodyPart(Spline.SplinePath);
             Body.UpdateSnakeBodyAfterSnack();
             GameAudioManager.Instance.EatSnackAudioSource.Play();
+            GameManager.Instance.AddSnakeLength();
             ShouldGrowNextUpdate = true;
         }
 

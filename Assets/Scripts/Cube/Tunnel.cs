@@ -9,7 +9,7 @@ public class Tunnel
     public CubePoint PointB;
     public CubePoint? Entry = null; // could be either PointA or PointB --> each time a snake moves on a tunnel, this should be refreshed
 
-    public bool HeadGoesThroughTunnel = false;
+    public bool IsSnakeHeadInTunnel = false;
 
     public Tunnel (CubePoint pointA, CubePoint pointB)
     {
