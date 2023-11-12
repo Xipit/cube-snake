@@ -33,7 +33,7 @@ public class FreeModeMenuManager : MonoBehaviour
         DimensionYInput.onDeselect.AddListener(ValidateDimensionInput);
         DimensionZInput.onDeselect.AddListener(ValidateDimensionInput);
 
-        RandomSlider.onValueChanged.AddListener(WIPDImensionTextChange);
+        RandomSlider.onValueChanged.AddListener(SetDimensionText);
     }
 
     public void StartGame()
@@ -90,9 +90,9 @@ public class FreeModeMenuManager : MonoBehaviour
         }
     }
 
-    private void WIPDImensionTextChange(float newValue)
+    private void SetDimensionText(float isRandom)
     {
-        if(newValue == 1)
+        if(isRandom == 1)
         {
             DimensionText.text = "Max Dimension";
         }
