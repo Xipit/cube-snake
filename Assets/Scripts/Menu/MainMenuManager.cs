@@ -13,7 +13,15 @@ public class MainMenuManager : MonoBehaviour
     public GameObject PanelSettings;
     public GameObject PanelTutorial;
     public GameObject PanelFreeMode;
-    
+
+    public void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            CloseAllPanels();
+        }
+    }
+
     public void StartRandomGame()
     {
         GameModeManager.Instance.StartGameWithGameMode(GameMode.CreateRandomGameMode());
