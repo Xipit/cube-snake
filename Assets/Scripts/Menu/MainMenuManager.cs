@@ -5,17 +5,15 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI; 
 
+/// <summary>
+/// Responsible for managing UI Canvas in the "Main" Scene
+/// </summary>
 public class MainMenuManager : MonoBehaviour
 {
     public GameObject PanelSettings;
     public GameObject PanelTutorial;
     public GameObject PanelFreeMode;
     
-    
-  
-
-
-
     public void StartRandomGame()
     {
         GameModeManager.Instance.StartGameWithGameMode(GameMode.CreateRandomGameMode());
@@ -44,8 +42,12 @@ public class MainMenuManager : MonoBehaviour
 
     public void QuitGame()
     {
-        // Load the Options Menu scene when the "Menu Quit" button is clicked
-        SceneManager.LoadScene("Menu Quit");
+        #if UNITY_EDITOR
+        Debug.Log("Quit button has been pressed. This doesnt do anything in the Unity Editor.");
+        return;
+        #endif
+
+        Application.Quit();
     }
 
     public void CloseGame()

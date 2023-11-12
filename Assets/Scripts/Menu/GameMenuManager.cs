@@ -5,6 +5,9 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Responsible for managing UI Canvas in the "Game" Scene
+/// </summary>
 public class GameMenuManager : MonoBehaviour
 {
     public static GameMenuManager Instance { get; private set; }

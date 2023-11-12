@@ -5,6 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// This class stores the reference to the current GameMode and allows other scripts to alter that GameMode.
+/// <br/> The current GameMode controls the Game Settings and is referenced inside the "Game" Scene by the Game Manager.
 /// </summary>
 public class GameModeManager : MonoBehaviour
 {

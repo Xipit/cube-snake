@@ -15,4 +15,4 @@ MonoBehaviour:
   dimensionsAreRandom: 0
   cubeIsSquare: 0
   dimension: {x: 5, y: 5, z: 5}
-  speedFactor: 1.5
+  speedFactor: 1.3
