@@ -39,14 +39,14 @@ namespace Snake
         {
             // This defines how the cube is rotated on the spawnSide, so that _Up_ Input matches _Up_ on the screen
             ReferenceDirectionForInput = DirectionOnCubeSide.posVert;
+
+            // stepInterval = 0.4 / 2 = 0.2
+            this.StepInterval = this.StepInterval / mode.speedFactor;
             
             this.Spline = new SnakeSpline(this.transform, cube, startSide, ReferenceDirectionForInput);
             this.Body = new SnakeBody(cube, StepInterval, Spline.SplinePath, this.transform, SnakeHeadPrefab, SnakeBodyPrefab, SnakeTailPrefab, EmptyPrefab);
             this.Cube = cube;
             this.Snack = snack;
-
-            // stepInterval = 0.4 / 2 = 0.2
-            this.StepInterval = this.StepInterval / mode.speedFactor;
 
             StepInputDirection = InputDirection;
 
