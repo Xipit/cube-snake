@@ -27,6 +27,7 @@ namespace Snake
         [Header("Snake Bodyparts")]
         public GameObject SnakeHeadPrefab;
         public GameObject SnakeBodyPrefab;
+        public GameObject SnakeBodySmallPrefab;
         public GameObject SnakeTailPrefab;
         public GameObject EmptyPrefab;
 
